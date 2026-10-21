@@ -78,6 +78,8 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
 svg text{font-family:'Nunito Sans',Arial,sans-serif}
 footer{color:var(--muted);font-size:13px;padding:0 16px 30px}
 #banner:empty{display:none}
+.legal{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5}
+.legal p{margin:0 0 6px}
 .foot{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:16px}
 a.btn{text-decoration:none;display:inline-block}
 .btn.wa{background:#1F8F4E;border-color:#1F8F4E}
@@ -113,6 +115,10 @@ a.btn{text-decoration:none;display:inline-block}
   Creada por: <b>Daniel Humberto Narvaez Gallardo</b> · Economista</div>
   <div class="row"><a class="btn sm wa" href="https://wa.me/573156842617?text=Hola%20Daniel%2C%20vi%20la%20app%20Cuentas%20Claras%20y%20quiero%20informaci%C3%B3n%20sobre%20las%20asesor%C3%ADas%20de%20Business%20Solutions." target="_blank" rel="noopener">WhatsApp +57 315 684 2617</a>
   <a class="btn sm ghost" href="mailto:danielhnarvaezgallardo@gmail.com">danielhnarvaezgallardo@gmail.com</a></div>
+</div>
+<div class="legal">
+  <p><b>Aviso legal.</b> Cuentas Claras es una herramienta de apoyo para la toma de decisiones. Los resultados dependen de los datos ingresados por el usuario y no reemplazan la asesoría contable, tributaria, laboral o legal profesional. Los valores de referencia (salario mínimo, auxilio de transporte, jornada laboral, aportes, impuesto al consumo y exoneraciones) deben verificarse con la normativa vigente y con el contador del negocio. Los datos se guardan únicamente en el dispositivo del usuario; Business Solutions solo los recibe si el usuario decide enviarlos.</p>
+  <p>© 2026 Daniel Humberto Narvaez Gallardo · Business Solutions. Todos los derechos reservados. Se prohíbe la reproducción, distribución o modificación de esta aplicación sin autorización escrita del autor.</p>
 </div></footer>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="dls" hidden></div>
@@ -884,7 +890,9 @@ var acciones = {
         ["Costos fijos del mes", r1(R.cf)],["Margen de contribución promedio %", p1(R.mcPct)],["Ingresos netos de equilibrio al mes", r1(R.pe)],
         ["Equilibrio en caja por día", r1(R.peDia)],["Platos de equilibrio al mes", Math.ceil(R.pePlatos)],["Margen de seguridad %", p1(R.mseg)],[],
         ["Food cost real %", p1(R.fcReal)],["Prime cost real %", p1(R.pcReal)],["Capacidad de cocina utilizada %", p1(R.cap)],["Ticket promedio neto", r1(R.ticket)],
-        ["Costo de MOD por minuto", Math.round(R.modMin*100)/100],["Tasa CIF por minuto", Math.round(R.cifMin*100)/100]];
+        ["Costo de MOD por minuto", Math.round(R.modMin*100)/100],["Tasa CIF por minuto", Math.round(R.cifMin*100)/100],[],
+        ["Aviso legal: herramienta de apoyo para la toma de decisiones. Los resultados dependen de los datos ingresados y no reemplazan la asesoría contable, tributaria, laboral o legal profesional. Verifique la normativa vigente."],
+        ["© 2026 Daniel Humberto Narvaez Gallardo · Business Solutions · Cuentas Claras. Todos los derechos reservados."]];
       add("Resultados", res, [46,18]);
       add("Por categoría", [["Categoría","Platos","Unidades vendidas","Ventas netas","% de las ventas","Food cost %","Contribución","% de la contribución","Margen de contribución %"]].concat(
         R.cats.map(function(g){ return [g.nombre, g.platos, g.unidades, r1(g.ventas), p1(R.ingresos?g.ventas/R.ingresos:0), p1(g.fc), r1(g.contrib), p1(R.contrib?g.contrib/R.contrib:0), p1(g.mcPct)]; })), [22,8,14,14,12,11,14,14,14]);
