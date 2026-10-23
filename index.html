@@ -69,6 +69,12 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
 .neg{color:var(--bad);font-weight:700}
 .muted{color:var(--muted)}
 .miss{color:var(--bad);font-weight:700}
+.tipos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.tipo{font:inherit;text-align:left;cursor:pointer;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);display:flex;align-items:center;gap:10px;font-weight:700}
+.tipo span{font-size:24px;line-height:1}
+.tipo:hover{border-color:var(--navy-2)}
+.tipo[aria-pressed="true"]{border-color:var(--navy);background:var(--soft);color:var(--navy)}
+.tipo:focus-visible{outline:2px solid var(--navy-2);outline-offset:2px}
 .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .stat .k{font-size:13px;color:var(--muted);font-weight:700}
 .stat .v{font-size:22px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
@@ -208,60 +214,199 @@ var TABS = [["inicio","Inicio"],["parametros","Parámetros"],["insumos","Insumos
             ["personal","Personal"],["cif","CIF y gastos"],["menu","Menú"],["resultados","Resultados"]];
 function uid(){ return Math.random().toString(36).slice(2,10); }
 
-// ---------------- Datos de ejemplo ----------------
-function ejemplo(){
-  var ins = [
-    ["Pechuga de pollo sin hueso","Proteína","g",1000,22000,95],["Pollo entero","Proteína","g",1000,13000,70],
-    ["Carne de res (sobrebarriga)","Proteína","g",1000,30000,85],["Mojarra roja (unidad de 400 g)","Proteína","und",1,9000,100],
-    ["Huevo","Proteína","und",30,15000,100],["Arroz","Granos","g",1000,4200,100],["Fríjol rojo","Granos","g",500,5500,100],
-    ["Harina de trigo","Granos","g",1000,3800,100],["Papa pastusa","Verduras","g",1000,2500,85],["Plátano verde","Verduras","und",1,1000,100],
-    ["Cebolla cabezona","Verduras","g",1000,3500,90],["Cebolla larga","Verduras","g",500,2000,80],["Tomate chonto","Verduras","g",1000,4000,95],
-    ["Ajo","Verduras","g",250,3500,85],["Zanahoria","Verduras","g",1000,3000,85],["Lechuga","Verduras","g",500,2500,75],
-    ["Limón tahití (jugo)","Frutas","g",1000,4000,45],["Aceite vegetal","Abarrotes","ml",3000,24000,100],["Sal","Abarrotes","g",1000,1500,100],
-    ["Comino","Abarrotes","g",50,2000,100],["Color (achiote)","Abarrotes","g",100,2500,100],["Azúcar","Abarrotes","g",1000,4000,100],
-    ["Agua potable (botellón)","Bebidas","ml",20000,9000,100],["Empaque icopor para llevar","Empaque","und",1,600,100],
-    ["Vaso desechable con tapa","Empaque","und",50,15000,100]
-  ];
-  var C = {};
-  var insumos = ins.map(function(x,i){ var c = "INS-" + String(i+1).padStart(3,"0"); C[x[0]] = c;
+// ---------------- Datos de ejemplo por tipo de negocio ----------------
+// Insumo: [nombre, categoría, unidad, contenido, precio, rendimiento %]
+// Subreceta: [código, nombre, unidad, rendimiento total, minutos, [[insumo o SR, cantidad]]]
+// Producto: [código, nombre, categoría, porciones, minutos, precio, empaque, ventas, para llevar, [[insumo o SR, cantidad]]]
+// Personal: [cargo, área, salario (o {turno, nturnos}), dedicación a producción]
+var NEG = {
+  restaurante: {label:"Restaurante", icono:"🍽️", nombre:"Restaurante de ejemplo", prod:["Platos","plato"],
+    desc:"Almuerzos y platos a la carta: subrecetas de arroz, hogao y fríjoles, platos fuertes, almuerzo ejecutivo y bebidas.",
+    cats:["Entradas","Platos fuertes","Almuerzos","Comidas rápidas","Acompañantes","Postres","Bebidas"],
+    params:{cobra:true, cobro:1000, plat:0.10, fco:0.33, prime:0.65, redondeo:500, dias:26},
+    ins:[["Pechuga de pollo sin hueso","Proteína","g",1000,22000,95],["Pollo entero","Proteína","g",1000,13000,70],
+      ["Carne de res (sobrebarriga)","Proteína","g",1000,30000,85],["Mojarra roja (unidad de 400 g)","Proteína","und",1,9000,100],
+      ["Huevo","Proteína","und",30,15000,100],["Arroz","Granos","g",1000,4200,100],["Fríjol rojo","Granos","g",500,5500,100],
+      ["Harina de trigo","Granos","g",1000,3800,100],["Papa pastusa","Verduras","g",1000,2500,85],["Plátano verde","Verduras","und",1,1000,100],
+      ["Cebolla cabezona","Verduras","g",1000,3500,90],["Cebolla larga","Verduras","g",500,2000,80],["Tomate chonto","Verduras","g",1000,4000,95],
+      ["Ajo","Verduras","g",250,3500,85],["Zanahoria","Verduras","g",1000,3000,85],["Lechuga","Verduras","g",500,2500,75],
+      ["Limón tahití (jugo)","Frutas","g",1000,4000,45],["Aceite vegetal","Abarrotes","ml",3000,24000,100],["Sal","Abarrotes","g",1000,1500,100],
+      ["Comino","Abarrotes","g",50,2000,100],["Color (achiote)","Abarrotes","g",100,2500,100],["Azúcar","Abarrotes","g",1000,4000,100],
+      ["Agua potable (botellón)","Bebidas","ml",20000,9000,100],["Empaque icopor para llevar","Empaque","und",1,600,100],
+      ["Vaso desechable con tapa","Empaque","und",50,15000,100]],
+    sub:[["SR-01","Arroz blanco","g",2500,20,[["Arroz",1000],["Aceite vegetal",40],["Sal",20]]],
+      ["SR-02","Hogao","g",800,25,[["Tomate chonto",600],["Cebolla larga",200],["Cebolla cabezona",200],["Aceite vegetal",60],["Sal",8],["Comino",3],["Ajo",15]]],
+      ["SR-03","Fríjoles","g",2600,45,[["Fríjol rojo",1000],["Cebolla cabezona",100],["Tomate chonto",150],["Ajo",10],["Sal",15],["Color (achiote)",5],["Aceite vegetal",30]]],
+      ["SR-04","Ensalada de la casa","g",800,15,[["Lechuga",300],["Tomate chonto",200],["Zanahoria",200],["Cebolla cabezona",100],["Limón tahití (jugo)",60],["Sal",5],["Aceite vegetal",30]]]],
+    pl:[["P-01","Pechuga a la plancha","Platos fuertes",1,6,22000,"Empaque icopor para llevar",320,60,[["Pechuga de pollo sin hueso",250],["SR-01",200],["SR-04",100],["Plátano verde",1],["Aceite vegetal",30],["Ajo",5],["Sal",3]]],
+      ["P-02","Sobrebarriga en salsa criolla","Platos fuertes",1,5,28000,"Empaque icopor para llevar",200,30,[["Carne de res (sobrebarriga)",250],["SR-02",80],["SR-01",200],["Papa pastusa",150],["SR-04",80],["Aceite vegetal",15]]],
+      ["P-03","Mojarra frita","Platos fuertes",1,8,30000,"Empaque icopor para llevar",160,20,[["Mojarra roja (unidad de 400 g)",1],["Aceite vegetal",100],["Harina de trigo",30],["Limón tahití (jugo)",40],["Sal",5],["SR-01",200],["Plátano verde",1],["SR-04",80]]],
+      ["P-04","Arroz con pollo","Platos fuertes",1,4,18000,"Empaque icopor para llevar",280,70,[["Pollo entero",200],["Arroz",120],["SR-02",60],["Zanahoria",30],["Color (achiote)",2],["Sal",3],["Aceite vegetal",15]]],
+      ["P-05","Almuerzo ejecutivo","Almuerzos",1,3,16000,"Empaque icopor para llevar",1300,260,[["SR-03",200],["SR-01",200],["Pechuga de pollo sin hueso",150],["Huevo",1],["Plátano verde",0.5],["SR-04",60],["Aceite vegetal",20]]],
+      ["P-06","Limonada natural","Bebidas",1,2,5000,"Vaso desechable con tapa",1100,150,[["Limón tahití (jugo)",120],["Azúcar",40],["Agua potable (botellón)",300]]]],
+    personal:[["Cocinero principal","Cocina",2200000,1],["Auxiliar de cocina","Cocina",1750905,1],["Auxiliar de cocina","Cocina",1750905,1],
+      ["Mesero","Servicio",1750905,0],["Mesero","Servicio",1750905,0],["Cajero / administrador","Administración",2000000,0]],
+    cif:[["Arriendo",2500000,.4],["Energía eléctrica",900000,.7],["Acueducto y alcantarillado",250000,.7],["Gas",450000,1],["Internet y TV",90000,0],
+      ["Mantenimiento de equipos",150000,1],["Aseo y desinfección",200000,.7],["Reposición de utensilios y menaje",150000,.8],
+      ["Dotación de cocina (prorrateo)",60000,1],["Fumigación (prorrateo)",50000,1]],
+    equipos:[["Estufa industrial",3500000,10,1],["Freidora",1800000,5,1],["Nevera y congelador",4000000,10,1],["Licuadora industrial",900000,5,1],
+      ["Campana extractora",2500000,10,1],["Mesas de acero inoxidable",2000000,10,1],["Mesas y sillas del comedor",3000000,10,0],["Computador y caja",2500000,5,0]],
+    gastos:[["Contador",500000],["Publicidad y redes sociales",300000],["Software de caja y facturación electrónica",120000],["Industria y comercio (estimado mensual)",100000],
+      ["Derechos de autor por música (prorrateo)",30000],["Seguros",80000],["Papelería",50000],["Cuotas bancarias y datáfono",40000]]},
+
+  panaderia: {label:"Panadería", icono:"🥖", nombre:"Panadería de ejemplo", prod:["Productos","producto"],
+    desc:"Producción por tandas: una masa base que rinde varios panes, pan de sal, pan dulce, almojábanas, pan tajado y tinto.",
+    cats:["Pan de sal","Pan dulce","Pan de queso","Pan tajado","Bebidas"],
+    params:{cobra:false, cobro:0, plat:0.02, fco:0.33, prime:0.60, redondeo:100, dias:30},
+    ins:[["Harina de trigo panificable (bulto)","Granos","g",50000,115000,100],["Azúcar","Abarrotes","g",1000,4000,100],["Sal","Abarrotes","g",1000,1500,100],
+      ["Levadura fresca","Abarrotes","g",500,7000,100],["Margarina de panadería (caja)","Abarrotes","g",15000,120000,100],["Huevo","Proteína","und",30,15000,100],
+      ["Leche entera","Lácteos","ml",1100,4200,100],["Queso costeño","Lácteos","g",1000,22000,100],["Bocadillo de guayaba","Abarrotes","g",1000,9000,100],
+      ["Almidón de yuca","Granos","g",1000,6500,100],["Harina de maíz precocida","Granos","g",1000,4500,100],["Café molido","Bebidas","g",500,18000,100],
+      ["Bolsa plástica para pan tajado","Empaque","und",100,5000,100],["Vaso desechable para tinto","Empaque","und",50,4000,100]],
+    sub:[["SR-01","Masa de pan blanco","g",17500,60,[["Harina de trigo panificable (bulto)",10000],["Azúcar",1200],["Sal",180],["Levadura fresca",300],["Margarina de panadería (caja)",1000],["Huevo",10],["Leche entera",2000]]],
+      ["SR-02","Masa de almojábana","g",2300,30,[["Queso costeño",1000],["Almidón de yuca",500],["Harina de maíz precocida",200],["Huevo",4],["Leche entera",200],["Margarina de panadería (caja)",50]]]],
+    pl:[["P-01","Pan blanco de $500","Pan de sal",50,10,500,"",9000,0,[["SR-01",2500]]],
+      ["P-02","Pan aliñado","Pan de sal",30,15,1200,"",4500,0,[["SR-01",2400],["Queso costeño",150],["Azúcar",100]]],
+      ["P-03","Pan de bocadillo","Pan dulce",25,15,1500,"",2500,0,[["SR-01",2000],["Bocadillo de guayaba",750]]],
+      ["P-04","Almojábana","Pan de queso",30,10,2500,"",2000,0,[["SR-02",2300]]],
+      ["P-05","Pan tajado de 500 g","Pan tajado",10,20,6000,"",600,0,[["SR-01",5500],["Bolsa plástica para pan tajado",10]]],
+      ["P-06","Tinto","Bebidas",1,0.5,1500,"",2500,0,[["Café molido",8],["Azúcar",10],["Vaso desechable para tinto",1]]]],
+    personal:[["Panadero maestro","Cocina",2300000,1],["Ayudante de panadería","Cocina",1750905,1],["Vendedora / cajera","Servicio",1750905,0]],
+    cif:[["Arriendo",1500000,.5],["Energía eléctrica",700000,.6],["Gas del horno",600000,1],["Acueducto y alcantarillado",120000,.7],
+      ["Mantenimiento del horno y la amasadora",100000,1],["Aseo y desinfección",100000,.7],["Fumigación (prorrateo)",40000,1]],
+    equipos:[["Horno industrial de 4 latas",6000000,10,1],["Amasadora",4500000,10,1],["Cámara de fermentación",3000000,10,1],["Mesa de trabajo",1500000,10,1],
+      ["Latas, moldes y utensilios",800000,5,1],["Vitrina de exhibición",2000000,10,0]],
+    gastos:[["Contador",400000],["Publicidad y redes sociales",100000],["Industria y comercio (estimado mensual)",60000],["Cuotas bancarias y datáfono",30000],["Papelería",20000]]},
+
+  pasteleria: {label:"Pastelería", icono:"🎂", nombre:"Pastelería de ejemplo", prod:["Productos","producto"],
+    desc:"Tortas enteras y por porción: bizcochos, chantilly y ganache como subrecetas, cheesecake, cupcakes y café.",
+    cats:["Tortas","Porciones","Postres individuales","Bebidas"],
+    params:{cobra:false, cobro:0, plat:0.15, fco:0.33, prime:0.60, redondeo:500, dias:26},
+    ins:[["Harina de trigo","Granos","g",1000,3800,100],["Azúcar","Abarrotes","g",1000,4000,100],["Huevo","Proteína","und",30,15000,100],
+      ["Mantequilla","Lácteos","g",500,14000,100],["Leche entera","Lácteos","ml",1100,4200,100],["Crema de leche","Lácteos","ml",1000,16000,100],
+      ["Queso crema","Lácteos","g",1000,26000,100],["Chocolate de cobertura","Abarrotes","g",1000,32000,100],["Cocoa en polvo","Abarrotes","g",500,15000,100],
+      ["Fresas","Frutas","g",500,6000,85],["Arequipe","Abarrotes","g",1000,14000,100],["Polvo de hornear","Abarrotes","g",250,4000,100],
+      ["Esencia de vainilla","Abarrotes","ml",500,8000,100],["Galleta tipo María","Abarrotes","g",1000,12000,100],["Café molido","Bebidas","g",500,18000,100],
+      ["Caja para torta","Empaque","und",1,3500,100],["Base de cartón para torta","Empaque","und",1,800,100],["Domo plástico para porción","Empaque","und",50,25000,100],
+      ["Vaso desechable con tapa","Empaque","und",50,15000,100]],
+    sub:[["SR-01","Bizcocho de vainilla","g",2400,40,[["Harina de trigo",700],["Azúcar",600],["Huevo",12],["Mantequilla",300],["Leche entera",250],["Polvo de hornear",20],["Esencia de vainilla",15]]],
+      ["SR-02","Bizcocho de chocolate","g",2500,40,[["Harina de trigo",600],["Cocoa en polvo",120],["Azúcar",650],["Huevo",12],["Mantequilla",300],["Leche entera",300],["Polvo de hornear",20]]],
+      ["SR-03","Crema chantilly","g",1100,10,[["Crema de leche",1000],["Azúcar",100]]],
+      ["SR-04","Ganache de chocolate","g",1400,15,[["Chocolate de cobertura",800],["Crema de leche",600]]]],
+    pl:[["P-01","Torta de vainilla con arequipe (libra)","Tortas",1,30,60000,"",60,0,[["SR-01",900],["Arequipe",350],["SR-03",300],["Base de cartón para torta",1],["Caja para torta",1]]],
+      ["P-02","Torta de chocolate con ganache (libra)","Tortas",1,30,70000,"",45,0,[["SR-02",900],["SR-04",500],["Base de cartón para torta",1],["Caja para torta",1]]],
+      ["P-03","Porción de cheesecake de fresa","Porciones",12,45,11000,"",500,0,[["Queso crema",900],["Azúcar",200],["Huevo",3],["Crema de leche",200],["Galleta tipo María",250],["Mantequilla",100],["Fresas",400],["Domo plástico para porción",12]]],
+      ["P-04","Porción de torta de chocolate","Porciones",12,20,9000,"",500,0,[["SR-02",1500],["SR-04",700],["Domo plástico para porción",12]]],
+      ["P-05","Cupcake decorado","Postres individuales",12,25,4000,"",600,0,[["SR-01",600],["SR-03",300],["Fresas",150]]],
+      ["P-06","Café americano","Bebidas",1,2,3500,"",800,0,[["Café molido",12],["Azúcar",10],["Vaso desechable con tapa",1]]]],
+    personal:[["Pastelera","Cocina",2400000,1],["Auxiliar de pastelería","Cocina",1750905,1],["Vendedor / cajero","Servicio",1750905,0]],
+    cif:[["Arriendo",1800000,.4],["Energía eléctrica",600000,.6],["Gas",200000,1],["Acueducto y alcantarillado",100000,.6],
+      ["Mantenimiento de equipos",80000,1],["Aseo y desinfección",100000,.7],["Reposición de moldes y utensilios",100000,1]],
+    equipos:[["Horno de convección",5000000,10,1],["Batidora planetaria",3000000,10,1],["Nevera vitrina refrigerada",4500000,10,.5],
+      ["Mesa de acero inoxidable",1200000,10,1],["Moldes y utensilios",1000000,5,1]],
+    gastos:[["Contador",400000],["Publicidad y redes sociales",300000],["Software de caja y facturación electrónica",80000],["Industria y comercio (estimado mensual)",60000],["Cuotas bancarias y datáfono",40000]]},
+
+  cafeteria: {label:"Cafetería", icono:"☕", nombre:"Cafetería de ejemplo", prod:["Productos","producto"],
+    desc:"Bebidas de café a partir de un lote de espresso, bebidas frías, chocolate y snacks comprados listos.",
+    cats:["Café caliente","Bebidas frías","Chocolate","Panadería y snacks"],
+    params:{cobra:false, cobro:0, plat:0.10, fco:0.30, prime:0.60, redondeo:500, dias:30},
+    ins:[["Café en grano especial","Bebidas","g",500,28000,100],["Leche entera","Lácteos","ml",1100,4200,100],["Azúcar","Abarrotes","g",1000,4000,100],
+      ["Chocolate de mesa","Abarrotes","g",500,9000,100],["Sirope de caramelo","Abarrotes","ml",750,30000,100],["Crema de leche","Lácteos","ml",1000,16000,100],
+      ["Hielo","Bebidas","g",5000,6000,100],["Croissant (comprado listo)","Panadería","und",1,2200,100],["Jamón","Proteína","g",1000,24000,100],
+      ["Queso campesino","Lácteos","g",1000,20000,100],["Mantequilla","Lácteos","g",500,14000,100],
+      ["Vaso de cartón 12 oz con tapa","Empaque","und",50,30000,100],["Vaso plástico 16 oz con tapa","Empaque","und",50,25000,100],["Bolsa de papel","Empaque","und",100,8000,100]],
+    sub:[["SR-01","Espresso (lote de 1 kg de café)","und",55,0,[["Café en grano especial",1000]]],
+      ["SR-02","Base de chocolate caliente","ml",3200,20,[["Chocolate de mesa",500],["Leche entera",3000],["Azúcar",100]]]],
+    pl:[["P-01","Café americano","Café caliente",1,2,4000,"Vaso de cartón 12 oz con tapa",1500,450,[["SR-01",1],["Azúcar",10]]],
+      ["P-02","Capuchino","Café caliente",1,3,6500,"Vaso de cartón 12 oz con tapa",1200,350,[["SR-01",1],["Leche entera",200]]],
+      ["P-03","Latte de caramelo","Café caliente",1,3,8500,"Vaso de cartón 12 oz con tapa",600,200,[["SR-01",1],["Leche entera",250],["Sirope de caramelo",20]]],
+      ["P-04","Café frappé","Bebidas frías",1,4,10000,"",400,0,[["SR-01",1],["Leche entera",150],["Hielo",200],["Sirope de caramelo",20],["Crema de leche",40],["Azúcar",20],["Vaso plástico 16 oz con tapa",1]]],
+      ["P-05","Chocolate caliente","Chocolate",1,2,5500,"Vaso de cartón 12 oz con tapa",250,60,[["SR-02",250]]],
+      ["P-06","Croissant de jamón y queso","Panadería y snacks",1,3,12000,"Bolsa de papel",500,150,[["Croissant (comprado listo)",1],["Jamón",40],["Queso campesino",40],["Mantequilla",10]]]],
+    personal:[["Barista principal","Cocina",1900000,1],["Barista","Cocina",1750905,1],["Administradora","Administración",2200000,0]],
+    cif:[["Arriendo",3000000,.3],["Energía eléctrica",700000,.6],["Acueducto y alcantarillado",150000,.5],["Internet y TV",100000,0],
+      ["Mantenimiento de la máquina de café",150000,1],["Aseo y desinfección",150000,.6],["Reposición de menaje",80000,.8]],
+    equipos:[["Máquina de espresso de 2 grupos",14000000,10,1],["Molino de café",3000000,10,1],["Licuadora",900000,5,1],["Nevera",3000000,10,1],
+      ["Mobiliario del local",6000000,10,0],["Computador y caja",2500000,5,0]],
+    gastos:[["Contador",500000],["Publicidad y redes sociales",400000],["Software de caja y facturación electrónica",120000],["Industria y comercio (estimado mensual)",100000],
+      ["Derechos de autor por música (prorrateo)",30000],["Seguros",80000],["Cuotas bancarias y datáfono",60000]]},
+
+  rapidas: {label:"Comidas rápidas", icono:"🍔", nombre:"Comidas rápidas de ejemplo", prod:["Productos","producto"],
+    desc:"Hamburguesas, perros y salchipapas con mucho domicilio: carne de hamburguesa y papas como subrecetas.",
+    cats:["Hamburguesas","Perros","Salchipapas","Acompañantes","Bebidas"],
+    params:{cobra:true, cobro:1000, plat:0.25, fco:0.33, prime:0.60, redondeo:500, dias:26},
+    ins:[["Pan de hamburguesa","Panadería","und",12,9000,100],["Carne molida de res","Proteína","g",1000,24000,90],["Pan para perro","Panadería","und",10,6500,100],
+      ["Salchicha americana","Proteína","und",10,14000,100],["Queso mozzarella tajado","Lácteos","g",1000,26000,100],["Tocineta","Proteína","g",500,14000,60],
+      ["Papa pastusa","Verduras","g",1000,2500,80],["Papa ripio","Abarrotes","g",1000,8000,100],["Lechuga","Verduras","g",500,2500,75],
+      ["Tomate chonto","Verduras","g",1000,4000,95],["Cebolla cabezona","Verduras","g",1000,3500,90],["Salsas de la casa","Abarrotes","ml",4000,28000,100],
+      ["Aceite vegetal","Abarrotes","ml",3000,24000,100],["Sal","Abarrotes","g",1000,1500,100],["Gaseosa personal 400 ml","Bebidas","und",1,1800,100],
+      ["Caja para hamburguesa","Empaque","und",50,30000,100],["Papel parafinado y bolsa","Empaque","und",100,15000,100]],
+    sub:[["SR-01","Carne de hamburguesa (150 g)","und",7,15,[["Carne molida de res",1000],["Cebolla cabezona",50],["Sal",10]]],
+      ["SR-02","Papas a la francesa","g",900,15,[["Papa pastusa",1000],["Aceite vegetal",80],["Sal",10]]]],
+    pl:[["P-01","Hamburguesa sencilla","Hamburguesas",1,5,16000,"Caja para hamburguesa",700,400,[["Pan de hamburguesa",1],["SR-01",1],["Queso mozzarella tajado",20],["Lechuga",20],["Tomate chonto",30],["Salsas de la casa",30]]],
+      ["P-02","Hamburguesa doble con tocineta","Hamburguesas",1,7,30000,"Caja para hamburguesa",300,180,[["Pan de hamburguesa",1],["SR-01",2],["Queso mozzarella tajado",40],["Tocineta",40],["Lechuga",20],["Tomate chonto",30],["Salsas de la casa",30]]],
+      ["P-03","Perro caliente","Perros",1,4,10000,"Papel parafinado y bolsa",600,350,[["Pan para perro",1],["Salchicha americana",1],["Queso mozzarella tajado",30],["Papa ripio",20],["Salsas de la casa",40],["Cebolla cabezona",20]]],
+      ["P-04","Salchipapa","Salchipapas",1,5,15000,"Caja para hamburguesa",500,300,[["SR-02",300],["Salchicha americana",2],["Queso mozzarella tajado",30],["Salsas de la casa",50]]],
+      ["P-05","Porción de papas","Acompañantes",1,2,5000,"Papel parafinado y bolsa",400,200,[["SR-02",200],["Salsas de la casa",20]]],
+      ["P-06","Gaseosa personal","Bebidas",1,0,4000,"",800,0,[["Gaseosa personal 400 ml",1]]]],
+    personal:[["Cocinero de plancha","Cocina",1900000,1],["Auxiliar de cocina","Cocina",1750905,1],["Cajero","Servicio",1750905,0],["Domiciliario","Servicio",1750905,0]],
+    cif:[["Arriendo",1800000,.5],["Energía eléctrica",500000,.7],["Gas",350000,1],["Acueducto y alcantarillado",120000,.7],
+      ["Aseo y desinfección",120000,.7],["Mantenimiento de equipos",80000,1]],
+    equipos:[["Plancha industrial",2500000,10,1],["Freidora doble",1800000,5,1],["Nevera y congelador",3500000,10,1],["Mesa de acero inoxidable",1200000,10,1],
+      ["Mesas y sillas",2000000,10,0]],
+    gastos:[["Contador",400000],["Publicidad y redes sociales",300000],["Software de caja y facturación electrónica",80000],["Industria y comercio (estimado mensual)",70000],["Cuotas bancarias y datáfono",40000]]},
+
+  heladeria: {label:"Heladería y frutería", icono:"🍧", nombre:"Heladería y frutería de ejemplo", prod:["Productos","producto"],
+    desc:"Raspados, ensaladas de frutas, copas de helado, jugos y micheladas, con fruta picada como subreceta y un auxiliar por turnos.",
+    cats:["Raspados","Frutas","Helados","Jugos","Micheladas"],
+    params:{cobra:false, cobro:0, plat:0.10, fco:0.35, prime:0.60, redondeo:500, dias:30},
+    ins:[["Helado de vainilla (caja)","Lácteos","g",5000,55000,100],["Hielo","Bebidas","g",5000,6000,100],["Leche condensada","Lácteos","g",1000,14000,100],
+      ["Mango","Frutas","g",1000,4000,65],["Fresa","Frutas","g",500,6000,85],["Banano","Frutas","g",1000,3000,65],["Piña","Frutas","g",1000,3000,55],
+      ["Papaya","Frutas","g",1000,2500,70],["Queso costeño rallado","Lácteos","g",1000,22000,100],["Crema de leche","Lácteos","ml",1000,16000,100],
+      ["Siropes de frutas","Abarrotes","ml",1000,12000,100],["Leche entera","Lácteos","ml",1100,4200,100],["Azúcar","Abarrotes","g",1000,4000,100],
+      ["Galleta wafer","Abarrotes","und",50,15000,100],["Cerveza nacional","Licores","und",1,3000,100],["Limón tahití (jugo)","Frutas","g",1000,4000,45],
+      ["Sal","Abarrotes","g",1000,1500,100],["Vaso plástico 16 oz con tapa","Empaque","und",50,25000,100],["Cuchara desechable","Empaque","und",100,6000,100]],
+    sub:[["SR-01","Fruta picada mixta","g",4000,30,[["Mango",1000],["Fresa",500],["Banano",500],["Piña",1000],["Papaya",1000]]],
+      ["SR-02","Salsa de leche (crema y condensada)","g",1000,5,[["Crema de leche",500],["Leche condensada",500]]]],
+    pl:[["P-01","Raspado sencillo","Raspados",1,2,6000,"",900,0,[["Hielo",350],["Siropes de frutas",60],["Leche condensada",30],["Vaso plástico 16 oz con tapa",1],["Cuchara desechable",1]]],
+      ["P-02","Raspado especial con fruta y queso","Raspados",1,3,9000,"",500,0,[["Hielo",350],["Siropes de frutas",40],["Leche condensada",40],["SR-01",100],["Queso costeño rallado",20],["Vaso plástico 16 oz con tapa",1],["Cuchara desechable",1]]],
+      ["P-03","Ensalada de frutas grande","Frutas",1,4,15000,"",500,0,[["SR-01",350],["Helado de vainilla (caja)",80],["Queso costeño rallado",30],["SR-02",60],["Galleta wafer",1],["Vaso plástico 16 oz con tapa",1],["Cuchara desechable",1]]],
+      ["P-04","Copa de helado","Helados",1,3,10000,"",400,0,[["Helado de vainilla (caja)",200],["SR-01",50],["Siropes de frutas",20],["Galleta wafer",1],["Vaso plástico 16 oz con tapa",1],["Cuchara desechable",1]]],
+      ["P-05","Jugo de mango en leche","Jugos",1,2,8000,"",600,0,[["Mango",200],["Leche entera",250],["Azúcar",25],["Hielo",100],["Vaso plástico 16 oz con tapa",1]]],
+      ["P-06","Michelada","Micheladas",1,2,10000,"",400,0,[["Cerveza nacional",1],["Limón tahití (jugo)",40],["Sal",5],["Hielo",150],["Vaso plástico 16 oz con tapa",1]]]],
+    personal:[["Preparadora","Cocina",1750905,1],["Auxiliar de fines de semana","Cocina",{turno:70000, nturnos:8},1],["Cajero","Servicio",1750905,0]],
+    cif:[["Arriendo",1200000,.5],["Energía eléctrica",600000,.7],["Acueducto y alcantarillado",80000,.7],["Aseo y desinfección",80000,.7],["Mantenimiento de congeladores",60000,1]],
+    equipos:[["Congelador horizontal",2500000,10,1],["Máquina raspadora de hielo",1500000,5,1],["Licuadora industrial",900000,5,1],["Vitrina refrigerada",3000000,10,.5],
+      ["Mesas y sillas",1500000,10,0]],
+    gastos:[["Contador",300000],["Publicidad y redes sociales",200000],["Industria y comercio (estimado mensual)",40000],["Cuotas bancarias y datáfono",30000]]}
+};
+var TIPOS = ["restaurante","panaderia","pasteleria","cafeteria","rapidas","heladeria"];
+function tipoDe(s){ var t = s && s.params && s.params.tipo; return NEG[t] ? t : "restaurante"; }
+function negocio(){ return NEG[tipoDe(S)]; }
+
+function ejemplo(tipo){
+  tipo = NEG[tipo] ? tipo : "restaurante";
+  var sp = NEG[tipo], C = {};
+  var insumos = sp.ins.map(function(x,i){ var c = "INS-" + String(i+1).padStart(3,"0"); C[x[0]] = c;
     return {id:uid(), codigo:c, nombre:x[0], cat:x[1], unidad:x[2], cont:x[3], precio:x[4], rend:x[5]/100}; });
   function items(list){ return list.map(function(x){ return {id:uid(), code: x[0].indexOf("SR-")===0 ? x[0] : C[x[0]], qty:x[1]}; }); }
-  var subrecetas = [
-    ["SR-01","Arroz blanco",2500,20,[["Arroz",1000],["Aceite vegetal",40],["Sal",20]]],
-    ["SR-02","Hogao",800,25,[["Tomate chonto",600],["Cebolla larga",200],["Cebolla cabezona",200],["Aceite vegetal",60],["Sal",8],["Comino",3],["Ajo",15]]],
-    ["SR-03","Fríjoles",2600,45,[["Fríjol rojo",1000],["Cebolla cabezona",100],["Tomate chonto",150],["Ajo",10],["Sal",15],["Color (achiote)",5],["Aceite vegetal",30]]],
-    ["SR-04","Ensalada de la casa",800,15,[["Lechuga",300],["Tomate chonto",200],["Zanahoria",200],["Cebolla cabezona",100],["Limón tahití (jugo)",60],["Sal",5],["Aceite vegetal",30]]]
-  ].map(function(s){ return {id:uid(), codigo:s[0], nombre:s[1], unidad:"g", rendTotal:s[2], minutos:s[3], items:items(s[4])}; });
-  var platos = [
-    ["P-01","Pechuga a la plancha","Platos fuertes",1,6,22000,"Empaque icopor para llevar",320,[["Pechuga de pollo sin hueso",250],["SR-01",200],["SR-04",100],["Plátano verde",1],["Aceite vegetal",30],["Ajo",5],["Sal",3]]],
-    ["P-02","Sobrebarriga en salsa criolla","Platos fuertes",1,5,28000,"Empaque icopor para llevar",200,[["Carne de res (sobrebarriga)",250],["SR-02",80],["SR-01",200],["Papa pastusa",150],["SR-04",80],["Aceite vegetal",15]]],
-    ["P-03","Mojarra frita","Platos fuertes",1,8,30000,"Empaque icopor para llevar",160,[["Mojarra roja (unidad de 400 g)",1],["Aceite vegetal",100],["Harina de trigo",30],["Limón tahití (jugo)",40],["Sal",5],["SR-01",200],["Plátano verde",1],["SR-04",80]]],
-    ["P-04","Arroz con pollo","Platos fuertes",1,4,18000,"Empaque icopor para llevar",280,[["Pollo entero",200],["Arroz",120],["SR-02",60],["Zanahoria",30],["Color (achiote)",2],["Sal",3],["Aceite vegetal",15]]],
-    ["P-05","Almuerzo ejecutivo","Almuerzos",1,3,16000,"Empaque icopor para llevar",1300,[["SR-03",200],["SR-01",200],["Pechuga de pollo sin hueso",150],["Huevo",1],["Plátano verde",0.5],["SR-04",60],["Aceite vegetal",20]]],
-    ["P-06","Limonada natural","Bebidas",1,2,5000,"Vaso desechable con tapa",1100,[["Limón tahití (jugo)",120],["Azúcar",40],["Agua potable (botellón)",300]]]
-  ].map(function(p, i){ return {id:uid(), codigo:p[0], nombre:p[1], cat:p[2], porciones:p[3], minutos:p[4], precio:p[5], empaque:C[p[6]], ventas:p[7], llevar:[60,30,20,70,260,150][i], items:items(p[8])}; });
+  var params = {restaurante:sp.nombre, tipo:tipo, mes:"Octubre 2026", smmlv:1750905, aux:249095, jornada:42, efic:0.85, exo:true, arl:0.01044,
+          ico:false, icot:0.08, fco:0.33, prime:0.65, cond:0.03, cobra:true, cobro:1000, plat:0.10, com:0.25, redondeo:500, dias:26};
+  Object.keys(sp.params).forEach(function(k){ params[k] = sp.params[k]; });
   return {
-    v:1,
-    params:{restaurante:"Restaurante de ejemplo", mes:"Octubre 2026", smmlv:1750905, aux:249095, jornada:42, efic:0.85, exo:true, arl:0.01044,
-            ico:false, icot:0.08, fco:0.33, prime:0.65, cond:0.03, cobra:true, cobro:1000, plat:0.10, com:0.25, redondeo:500, dias:26},
-    insumos:insumos, subrecetas:subrecetas, platos:platos,
-    personal:[["Cocinero principal","Cocina",2200000,1],["Auxiliar de cocina","Cocina",1750905,1],["Auxiliar de cocina","Cocina",1750905,1],
-              ["Mesero","Servicio",1750905,0],["Mesero","Servicio",1750905,0],["Cajero / administrador","Administración",2000000,0]]
-              .map(function(x){ return {id:uid(), cargo:x[0], area:x[1], salario:x[2], ded:x[3]}; }),
-    cif:[["Arriendo",2500000,.4],["Energía eléctrica",900000,.7],["Acueducto y alcantarillado",250000,.7],["Gas",450000,1],["Internet y TV",90000,0],
-         ["Mantenimiento de equipos",150000,1],["Aseo y desinfección",200000,.7],["Reposición de utensilios y menaje",150000,.8],
-         ["Dotación de cocina (prorrateo)",60000,1],["Fumigación (prorrateo)",50000,1]].map(function(x){ return {id:uid(), rubro:x[0], valor:x[1], pct:x[2]}; }),
-    equipos:[["Estufa industrial",3500000,10,1],["Freidora",1800000,5,1],["Nevera y congelador",4000000,10,1],["Licuadora industrial",900000,5,1],
-             ["Campana extractora",2500000,10,1],["Mesas de acero inoxidable",2000000,10,1],["Mesas y sillas del comedor",3000000,10,0],["Computador y caja",2500000,5,0]]
-             .map(function(x){ return {id:uid(), nombre:x[0], valor:x[1], vida:x[2], pct:x[3]}; }),
-    gastos:[["Contador",500000],["Publicidad y redes sociales",300000],["Software de caja y facturación electrónica",120000],["Industria y comercio (estimado mensual)",100000],
-            ["Derechos de autor por música (prorrateo)",30000],["Seguros",80000],["Papelería",50000],["Cuotas bancarias y datáfono",40000]]
-            .map(function(x){ return {id:uid(), concepto:x[0], valor:x[1]}; })
+    v:1, params:params, insumos:insumos,
+    subrecetas: sp.sub.map(function(s){ return {id:uid(), codigo:s[0], nombre:s[1], unidad:s[2], rendTotal:s[3], minutos:s[4], items:items(s[5])}; }),
+    platos: sp.pl.map(function(p){ return {id:uid(), codigo:p[0], nombre:p[1], cat:p[2], porciones:p[3], minutos:p[4], precio:p[5], empaque:p[6] ? C[p[6]] : "", ventas:p[7], llevar:p[8], items:items(p[9])}; }),
+    personal: sp.personal.map(function(x){ var t = typeof x[2] === "object";
+      return {id:uid(), cargo:x[0], area:x[1], tipo:t ? "turnos" : "mensual", salario:t ? "" : x[2], turno:t ? x[2].turno : "", nturnos:t ? x[2].nturnos : "", horas:8, prest:false, ded:x[3]}; }),
+    cif: sp.cif.map(function(x){ return {id:uid(), rubro:x[0], valor:x[1], pct:x[2]}; }),
+    equipos: sp.equipos.map(function(x){ return {id:uid(), nombre:x[0], valor:x[1], vida:x[2], pct:x[3]}; }),
+    gastos: sp.gastos.map(function(x){ return {id:uid(), concepto:x[0], valor:x[1]}; })
   };
 }
-function blanco(){
-  var e = ejemplo();
-  e.params.restaurante = "Nuevo restaurante"; e.insumos=[]; e.subrecetas=[]; e.platos=[]; e.personal=[]; e.cif=[]; e.equipos=[]; e.gastos=[];
+function blanco(tipo){
+  var e = ejemplo(tipo || tipoDe(S));
+  e.params.restaurante = "Mi negocio"; e.insumos=[]; e.subrecetas=[]; e.platos=[]; e.personal=[]; e.cif=[]; e.equipos=[]; e.gastos=[];
   return e;
 }
 
@@ -288,7 +433,7 @@ function opciones(base, usadas){
 function renderDatalists(){
   var el = document.getElementById("dls"); if (!el) return;
   el.innerHTML = '<datalist id="dl-cat-ins">'+opciones(CAT_INS, S.insumos.map(function(x){ return x.cat; }))+'</datalist>'+
-                 '<datalist id="dl-cat-pl">'+opciones(CAT_PL, S.platos.map(function(x){ return x.cat; }))+'</datalist>';
+                 '<datalist id="dl-cat-pl">'+opciones(negocio().cats, S.platos.map(function(x){ return x.cat; }))+'</datalist>';
 }
 function renderBanner(){
   var b = document.getElementById("banner"); if (!b) return;
@@ -300,8 +445,8 @@ function renderBanner(){
   }
   b.className = "";
   var old = META.pending && (Date.now() - META.pending > 864e5) && !(CLOUD.user && CLOUD.status === "ok");
-  b.innerHTML = old ? '<div class="wrap"><span><b>Tiene cambios sin respaldar desde el '+fecha(META.pending)+'</b> · Envíe o descargue una copia para no perderlos.</span>'+
-    '<span class="row"><button class="btn sm wa" data-act="share">Enviar al asesor por WhatsApp</button><button class="btn sm ghost" data-act="export">Descargar copia</button></span></div>' : "";
+  b.innerHTML = old ? '<div class="wrap"><span><b>Tiene cambios sin respaldar desde el '+fecha(META.pending)+'</b> · Inicie sesión para guardarlos en la nube o descargue una copia.</span>'+
+    '<span class="row"><button class="btn sm ghost" data-act="export">Descargar copia</button></span></div>' : "";
 }
 
 // ---------------- Formato ----------------
@@ -466,33 +611,35 @@ var V = {};
 function field(label, html, help){ return '<div class="field"><label>'+label+'</label>'+html+(help?'<div class="muted" style="font-size:12px;margin-top:2px">'+help+'</div>':'')+'</div>'; }
 
 V.inicio = function(R){
-  var p = S.params;
-  return '<h2>'+esc(p.restaurante)+'</h2><p class="help">Calcule el costo real de cada plato (materia prima con rendimiento, mano de obra directa y CIF), el precio sugerido, la ingeniería de menú y el punto de equilibrio. Los datos que trae la aplicación son un ejemplo: reemplácelos por los del restaurante.</p>'+
+  var p = S.params, ng = negocio(), w = ng.prod;
+  return '<h2>'+esc(p.restaurante)+'</h2><p class="help">Calcule el costo real de cada '+w[1]+' (materia prima con rendimiento, mano de obra directa y CIF), el precio sugerido, la ingeniería de menú y el punto de equilibrio.</p>'+
+  '<div class="card"><h3>1. ¿Qué tipo de negocio es?</h3>'+
+    '<div class="tipos" role="group" aria-label="Tipo de negocio">'+TIPOS.map(function(t){ return '<button class="tipo" data-act="tipo" data-t="'+t+'" aria-pressed="'+(tipoDe(S)===t)+'"><span aria-hidden="true">'+NEG[t].icono+'</span>'+NEG[t].label+'</button>'; }).join("")+'</div>'+
+    '<p style="margin:0 0 12px"><b>Ejemplo de '+ng.label.toLowerCase()+':</b> '+ng.desc+'</p>'+
+    '<div class="toolbar"><button class="btn" data-act="demo">Ver el ejemplo de '+ng.label.toLowerCase()+'</button><button class="btn ghost" data-act="blank">Empezar en blanco</button></div>'+
+    '<p class="muted" style="font-size:13px;margin:8px 0 0">Elegir el tipo no borra nada. El ejemplo y «Empezar en blanco» sí reemplazan los datos actuales.</p></div>'+
   '<div class="grid3" style="margin-bottom:16px">'+
     '<div class="stat"><div class="k">Utilidad operacional del mes</div><div class="v">'+money(R.uo)+'</div></div>'+
     '<div class="stat"><div class="k">Punto de equilibrio (caja al día)</div><div class="v">'+money(R.peDia)+'</div></div>'+
-    '<div class="stat"><div class="k">Platos con alerta</div><div class="v">'+R.alertas+' de '+S.platos.length+'</div></div>'+
+    '<div class="stat"><div class="k">'+w[0]+' con alerta</div><div class="v">'+R.alertas+' de '+S.platos.length+'</div></div>'+
   '</div>'+
-  '<div class="card"><h3>Orden de trabajo</h3><ol style="margin:0;padding-left:20px">'+
+  '<div class="card"><h3>2. Orden de trabajo</h3><ol style="margin:0;padding-left:20px">'+
   '<li><b>Parámetros:</b> salario mínimo, jornada, impuestos, metas de food cost y domicilios.</li>'+
   '<li><b>Insumos:</b> cada insumo con su código, presentación de compra, precio y <b>rendimiento</b> (lo que queda útil después de limpiar, pelar o deshuesar).</li>'+
-  '<li><b>Subrecetas:</b> preparaciones base que se usan en varios platos, como arroz, hogao, fríjoles o salsas.</li>'+
-  '<li><b>Platos:</b> la ficha técnica de cada plato con sus ingredientes y cantidades.</li>'+
+  '<li><b>Subrecetas:</b> preparaciones base que se usan en varios '+w[0].toLowerCase()+', como masas, bizcochos, salsas, arroz o fruta picada.</li>'+
+  '<li><b>'+w[0]+':</b> la ficha técnica de cada '+w[1]+' con sus ingredientes y cantidades. Si una tanda rinde varias unidades, indíquelo en «Porciones que rinde».</li>'+
   '<li><b>Personal:</b> todo el personal. El de cocina, según su dedicación, forma la mano de obra directa.</li>'+
   '<li><b>CIF y gastos:</b> servicios, arriendo, depreciación de equipos y gastos de administración.</li>'+
-  '<li><b>Menú:</b> unidades vendidas en el mes de cada plato, para la ingeniería de menú.</li>'+
+  '<li><b>Menú:</b> unidades vendidas en el mes de cada '+w[1]+', para la ingeniería de menú.</li>'+
   '<li><b>Resultados:</b> estado de resultados, punto de equilibrio e indicadores.</li></ol></div>'+
   tarjetaNube()+
-  '<div class="card"><h3>Guardar y compartir los datos</h3><p class="help">Los datos se guardan en este navegador mientras no se borre el historial. Para no perderlos y para mostrarle el avance al asesor, envíe o descargue una copia con frecuencia. «Cargar datos» acepta esa copia o la <b>plantilla de Excel</b> llena.</p>'+
+  '<div class="card"><h3>Copias e informes</h3><p class="help">Con la sesión iniciada, todo se guarda solo en la nube y el asesor ve el avance. Sin sesión, los datos quedan en este navegador: descargue una copia de vez en cuando. «Cargar datos» acepta esa copia o la <b>plantilla de Excel</b> llena.</p>'+
   '<div class="status">Último respaldo: <b>'+fecha(META.backup)+'</b>'+(META.pending ? ' · <span class="miss">hay cambios sin respaldar</span>' : (META.backup ? ' · todo respaldado' : ''))+'</div>'+
   '<div class="toolbar">'+
-    '<button class="btn wa" data-act="share">Enviar al asesor por WhatsApp</button>'+
     '<button class="btn ghost" data-act="export">Descargar copia</button>'+
     '<button class="btn ghost" data-act="import">Cargar datos (copia o plantilla de Excel)</button>'+
     '<button class="btn ghost" data-act="xlsx">Exportar informe a Excel</button>'+
     '<button class="btn ghost" data-act="print">Imprimir</button>'+
-    '<button class="btn del" data-act="blank">Empezar en blanco</button>'+
-    '<button class="btn del" data-act="demo">Volver al ejemplo</button>'+
   '</div>'+
   (R.missing ? '<div class="alert bad">Hay '+R.missing+' ingrediente(s) con un código que ya no existe. Revise Subrecetas y Platos.</div>' : '<div class="alert ok">Todos los códigos de ingredientes existen.</div>')+
   '</div>';
@@ -502,7 +649,7 @@ V.parametros = function(R){
   var p = S.params, P = function(k){ return "params."+k; };
   return '<h2>Parámetros</h2><p class="help">Revise estos valores cada año o cuando cambie la ley.</p><div class="grid2">'+
   '<div class="card"><h3>Datos generales</h3>'+
-    field("Nombre del restaurante", inp(P("restaurante"),p.restaurante))+
+    field("Nombre del negocio", inp(P("restaurante"),p.restaurante))+
     field("Mes de análisis", inp(P("mes"),p.mes))+
     field("Días de atención al mes", inp(P("dias"),p.dias,"num"))+
     field("Redondear el precio sugerido a múltiplos de ($)", inp(P("redondeo"),p.redondeo,"num"))+
@@ -594,7 +741,7 @@ V.subrecetas = function(R){
 V.platos = function(R){
   if (!S.platos.find(function(x){ return x.id===UI.pl; })) UI.pl = S.platos[0] && S.platos[0].id;
   var x = S.platos.find(function(y){ return y.id===UI.pl; });
-  var h = '<h2>Platos</h2><p class="help">Ficha técnica de costos. Las cantidades son por preparación; si la preparación rinde varias porciones, indíquelo.</p>'+selector("pl", S.platos, UI.pl, "Plato");
+  var h = '<h2>'+negocio().prod[0]+'</h2><p class="help">Ficha técnica de costos. Las cantidades son por preparación; si la preparación rinde varias porciones, indíquelo.</p>'+selector("pl", S.platos, UI.pl, negocio().prod[1].charAt(0).toUpperCase()+negocio().prod[1].slice(1));
   if (!x) return h + '<div class="card muted">No hay platos. Cree el primero con «+ Nuevo».</div>';
   var r = R.pl[x.id], P = "platos."+x.id+".", emp = [["","Sin empaque"]].concat(S.insumos.map(function(i){ return [i.codigo, i.codigo+" · "+i.nombre]; }));
   return h + '<div class="grid2"><div><div class="card"><h3>Datos del plato</h3>'+
@@ -679,16 +826,20 @@ V.cif = function(R){
 
 V.menu = function(R){
   var h = '<h2>Menú e ingeniería de menú</h2><p class="help">Escriba las unidades vendidas en el mes de cada plato y cuántas salieron para llevar o a domicilio (salen del sistema de caja). Popularidad alta: participación ≥ 70 % del promedio. Rentabilidad alta: margen de contribución ≥ el promedio ponderado.</p>'+
-  '<div class="tw"><table><thead><tr><th style="min-width:210px">Plato</th><th class="r">Precio<br>carta</th><th class="r">Costo<br>producción</th><th class="r">Food<br>cost</th><th class="r">Precio<br>sugerido</th><th class="r">Margen contrib.<br>local / llevar</th><th class="r" style="min-width:86px">Vendidas<br>en el mes</th><th class="r" style="min-width:86px">De ellas<br>para llevar</th><th class="r">Mix</th><th style="min-width:220px">Clasificación y qué hacer</th></tr></thead><tbody>';
-  if (!S.platos.length) h += '<tr><td colspan="10" class="muted" style="text-align:center;padding:16px">No hay platos.</td></tr>';
+  '<div class="tw"><table><thead><tr><th style="min-width:210px">Plato</th><th class="r">Precio<br>carta</th><th class="r">Costo<br>producción</th><th class="r">Food<br>cost</th><th class="r">Precio<br>sugerido</th><th class="r">Margen por unidad<br>$ y % (local)</th><th class="r" style="min-width:86px">Vendidas<br>en el mes</th><th class="r" style="min-width:86px">De ellas<br>para llevar</th><th class="r">Le deja<br>en el mes</th><th class="r" title="Qué parte de todas las unidades vendidas corresponde a este producto">Participación<br>en ventas</th><th style="min-width:220px">Clasificación y qué hacer</th></tr></thead><tbody>';
+  if (!S.platos.length) h += '<tr><td colspan="11" class="muted" style="text-align:center;padding:16px">No hay platos.</td></tr>';
   S.platos.forEach(function(x){
     var r = R.pl[x.id];
     h += '<tr><td><b>'+esc(x.nombre)+'</b><div class="muted" style="font-size:12px">'+esc(x.codigo)+(r.corta?' · <span class="miss">⚠ '+esc(r.corta)+'</span>':'')+'</div></td>'+
       '<td class="r calc">'+money(x.precio)+'</td><td class="r calc">'+money(r.costo)+'</td><td class="r calc">'+pct(r.fc)+'</td><td class="r calc">'+money(r.sug)+'</td>'+
-      '<td class="r calc">'+money(r.mc)+'<div class="muted" style="font-size:12px">'+money(r.mcL)+'</div></td><td>'+inp("platos."+x.id+".ventas",x.ventas,"num")+'</td><td>'+inp("platos."+x.id+".llevar",x.llevar,"num")+(N(x.llevar)>N(x.ventas)?'<div class="miss" style="font-size:12px">Supera el total</div>':'')+'</td><td class="r calc">'+pct(r.mix)+'</td>'+
+      '<td class="r calc"><b>'+money(r.mc)+'</b> · '+pct(r.neto?r.mc/r.neto:0)+'<div class="muted" style="font-size:12px">Para llevar: '+money(r.mcL)+'</div></td><td>'+inp("platos."+x.id+".ventas",x.ventas,"num")+'</td><td>'+inp("platos."+x.id+".llevar",x.llevar,"num")+(N(x.llevar)>N(x.ventas)?'<div class="miss" style="font-size:12px">Supera el total</div>':'')+'</td><td class="r calc"><b>'+money(r.mcProm*N(x.ventas))+'</b><div class="muted" style="font-size:12px">'+pct(R.contrib?r.mcProm*N(x.ventas)/R.contrib:0)+' del total</div></td><td class="r calc">'+pct(r.mix)+'</td>'+
       '<td>'+(r.clase?'<span class="pill '+r.clase+'">'+CLASE[r.clase]+'</span><div class="muted" style="font-size:12px;margin-top:3px">'+QUE[r.clase]+'</div>':'')+'</td></tr>';
   });
-  h += '<tr class="total"><td colspan="6">Total</td><td class="r">'+num(R.totVentas)+'</td><td class="r">'+num(R.totLlevar)+'</td><td colspan="2"></td></tr></tbody></table></div>';
+  h += '<tr class="total"><td colspan="6">Total</td><td class="r">'+num(R.totVentas)+'</td><td class="r">'+num(R.totLlevar)+'</td><td class="r">'+money(R.contrib)+'</td><td class="r">'+pct(R.totVentas?1:0)+'</td><td></td></tr></tbody></table></div>';
+  h += '<details style="margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fff"><summary style="cursor:pointer;font-weight:800">¿Qué significa cada columna?</summary>'+
+    '<p><b>Margen por unidad:</b> lo que le queda de cada '+negocio().prod[1]+' vendido después de pagar la materia prima, el empaque y la comisión de plataformas. El porcentaje es sobre el precio sin impuesto. Ese dinero es el que paga la nómina, el arriendo y los demás costos fijos; lo que sobra es utilidad. Para llevar suele ser distinto por el empaque y las comisiones.</p>'+
+    '<p><b>Le deja en el mes:</b> margen por unidad × unidades vendidas. Muestra qué '+negocio().prod[0].toLowerCase()+' sostienen el negocio: un '+negocio().prod[1]+' barato que se vende mucho puede dejar más que uno caro que casi no sale.</p>'+
+    '<p style="margin-bottom:0"><b>Participación en ventas</b> (antes «mix»): qué porcentaje de todas las unidades vendidas corresponde a este '+negocio().prod[1]+'. Si se vendieron 1.000 unidades y 250 fueron de este, su participación es 25 %. Con ella se mide la popularidad en la ingeniería de menú: es alta cuando llega al 70 % del promedio.</p></details>';
   return h + '<div class="card" style="margin-top:16px"><h3>Matriz de ingeniería de menú</h3>'+matriz(R)+'</div>';
 };
 
@@ -721,6 +872,59 @@ function matriz(R){
     placed.push({y:ly, x0:x0, x1:x0+lw});
     s += '<circle cx="'+px+'" cy="'+py+'" r="6" fill="#1F3A5F"/><text x="'+lx+'" y="'+ly+'" font-size="12" fill="#1B2430"'+(anchorEnd?' text-anchor="end"':'')+'>'+esc(x.nombre)+'</text>'; });
   return s + '</svg>';
+}
+
+function corto(v){ var a=Math.abs(v); return (v<0?"-":"")+(a>=1e6 ? fCOP.format(Math.round(a/1e5)/10)+" M" : a>=1e3 ? fCOP.format(Math.round(a/1e3))+" mil" : fCOP.format(Math.round(a))); }
+
+function graficaPE(R){
+  if (!(R.mcPct>0) || !(R.cf>0)) return '<p class="muted">Registre ventas en Menú y costos fijos para ver la gráfica.</p>';
+  var cvr = 1 - R.mcPct, W=760, H=400, l=78, rgt=24, t=24, b=56;
+  var xmax = Math.max(R.pe*1.8, R.ingresos*1.15), ymax = Math.max(xmax, R.cf + cvr*xmax)*1.05;
+  var X = function(v){ return l + v/xmax*(W-l-rgt); }, Y = function(v){ return H-b - v/ymax*(H-t-b); };
+  var s = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Gráfica de punto de equilibrio: ventas, costos fijos y costos totales" style="width:100%;height:auto;max-width:'+W+'px">';
+  // zonas de pérdida y utilidad entre la línea de ventas y la de costos totales
+  s += '<polygon points="'+X(0)+','+Y(0)+' '+X(R.pe)+','+Y(R.pe)+' '+X(0)+','+Y(R.cf)+'" fill="#F8DCDC" opacity=".8"/>';
+  s += '<polygon points="'+X(R.pe)+','+Y(R.pe)+' '+X(xmax)+','+Y(xmax)+' '+X(xmax)+','+Y(R.cf+cvr*xmax)+'" fill="#D7F0DC" opacity=".8"/>';
+  // cuadrícula y ejes
+  for (var i=1;i<=4;i++){ var gy = ymax*i/4, gx = xmax*i/4;
+    s += '<line x1="'+l+'" y1="'+Y(gy)+'" x2="'+(W-rgt)+'" y2="'+Y(gy)+'" stroke="#E3E7EC"/>';
+    s += '<text x="'+(l-6)+'" y="'+(Y(gy)+4)+'" text-anchor="end" font-size="11" fill="#5B6675">'+corto(gy)+'</text>';
+    s += '<text x="'+X(gx)+'" y="'+(H-b+18)+'" text-anchor="middle" font-size="11" fill="#5B6675">'+corto(gx)+'</text>'; }
+  s += '<line x1="'+l+'" y1="'+(H-b)+'" x2="'+(W-rgt)+'" y2="'+(H-b)+'" stroke="#8A94A3"/><line x1="'+l+'" y1="'+t+'" x2="'+l+'" y2="'+(H-b)+'" stroke="#8A94A3"/>';
+  // líneas
+  s += '<line x1="'+X(0)+'" y1="'+Y(R.cf)+'" x2="'+X(xmax)+'" y2="'+Y(R.cf)+'" stroke="#7A4A00" stroke-width="2.5" stroke-dasharray="7 5"/>';
+  s += '<line x1="'+X(0)+'" y1="'+Y(0)+'" x2="'+X(xmax)+'" y2="'+Y(cvr*xmax)+'" stroke="#B07D1A" stroke-width="2" stroke-dasharray="2 4"/>';
+  s += '<line x1="'+X(0)+'" y1="'+Y(R.cf)+'" x2="'+X(xmax)+'" y2="'+Y(R.cf+cvr*xmax)+'" stroke="#B3261E" stroke-width="3"/>';
+  s += '<line x1="'+X(0)+'" y1="'+Y(0)+'" x2="'+X(xmax)+'" y2="'+Y(xmax)+'" stroke="#1E7B34" stroke-width="3"/>';
+  // punto de equilibrio
+  s += '<line x1="'+X(R.pe)+'" y1="'+Y(R.pe)+'" x2="'+X(R.pe)+'" y2="'+(H-b)+'" stroke="#1F3A5F" stroke-dasharray="4 4"/>';
+  s += '<circle cx="'+X(R.pe)+'" cy="'+Y(R.pe)+'" r="7" fill="#1F3A5F"/>';
+  var peLeft = X(R.pe) > W*0.6;
+  s += '<text x="'+(X(R.pe)+(peLeft?-12:12))+'" y="'+(Y(R.pe)-12)+'" font-size="13" font-weight="800" fill="#1F3A5F" stroke="#fff" stroke-width="4" paint-order="stroke"'+(peLeft?' text-anchor="end"':'')+'>Punto de equilibrio: '+corto(R.pe)+'</text>';
+  // ventas actuales
+  if (R.ingresos>0){ var xa = X(R.ingresos);
+    s += '<line x1="'+xa+'" y1="'+t+'" x2="'+xa+'" y2="'+(H-b)+'" stroke="#5B6675" stroke-dasharray="2 3"/>';
+    s += '<text x="'+(xa+(xa>W*0.75?-6:6))+'" y="'+(t+12)+'" font-size="12" fill="#5B6675"'+(xa>W*0.75?' text-anchor="end"':'')+'>Ventas del mes: '+corto(R.ingresos)+'</text>'; }
+  s += '<text x="'+(X(R.pe*0.35))+'" y="'+(Y(R.cf*0.75)+4)+'" font-size="12" font-weight="800" fill="#8A1C14" text-anchor="middle">Pérdida</text>';
+  s += '<text x="'+(X(xmax*0.86))+'" y="'+(Y((xmax*0.86+R.cf+cvr*xmax*0.86)/2)+4)+'" font-size="12" font-weight="800" fill="#1E5E24" text-anchor="middle">Utilidad</text>';
+  s += '<text x="'+((l+W-rgt)/2)+'" y="'+(H-14)+'" text-anchor="middle" font-size="13" fill="#5B6675">Ventas netas del mes →</text>';
+  s += '<text transform="translate(16,'+((t+H-b)/2)+') rotate(-90)" text-anchor="middle" font-size="13" fill="#5B6675">Pesos →</text>';
+  s += '</svg>';
+  var ley = function(c,d,txt){ return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:16px"><svg width="26" height="8"><line x1="0" y1="4" x2="26" y2="4" stroke="'+c+'" stroke-width="3"'+(d?' stroke-dasharray="'+d+'"':'')+'/></svg>'+txt+'</span>'; };
+  return s + '<div style="font-size:13px;margin-top:6px;line-height:1.9">'+ley("#1E7B34","","Ventas")+ley("#B3261E","","Costos totales (fijos + variables)")+ley("#7A4A00","7 5","Costos fijos")+ley("#B07D1A","2 4","Costos variables")+'</div>';
+}
+
+function explicaPE(R){
+  var p = S.params, d = N(p.dias)||26, falta = R.pe - R.ingresos;
+  return '<details style="margin-top:16px;border:1px solid #E3E7EC;border-radius:10px;padding:12px 16px;background:#FAFBFC"><summary style="cursor:pointer;font-weight:800">¿Qué significan las ventas de equilibrio?</summary>'+
+  '<p>Las <b>ventas de equilibrio</b> son lo mínimo que el restaurante tiene que vender en el mes para <b>no perder ni ganar</b>: con esa venta alcanza justo para pagar la materia prima, los empaques y comisiones, y todos los costos fijos (nómina, arriendo, servicios, gastos). Por debajo de esa cifra hay pérdida; por encima, cada peso adicional deja utilidad.</p>'+
+  '<p><b>Cómo se calcula:</b> costos fijos ÷ margen de contribución %. Aquí: '+money(R.cf)+' ÷ '+pct(R.mcPct)+' = <b>'+money(R.pe)+'</b> al mes.</p>'+
+  '<p><b>Por qué funciona:</b> de cada $100 que vende, '+fCOP.format(Math.round(R.mcPct*100))+' quedan libres después de pagar los costos variables. Ese margen es el que va pagando los costos fijos; cuando los cubre completos, el negocio llega al equilibrio.</p>'+
+  '<p><b>En el día a día:</b> son unos '+money(R.peDia)+' en caja por día ('+num(d)+' días de trabajo)'+(R.pePlatos?', o cerca de '+num(Math.ceil(R.pePlatos))+' platos al mes':'')+'.</p>'+
+  (R.ingresos>0 ? (falta>0
+    ? '<div class="alert bad">Este mes las ventas ('+money(R.ingresos)+') están '+money(falta)+' por debajo del equilibrio: el restaurante está perdiendo. Opciones: vender más, mejorar el margen (precios, porciones, proveedores) o bajar costos fijos.</div>'
+    : '<div class="alert ok">Este mes las ventas ('+money(R.ingresos)+') superan el equilibrio en '+money(-falta)+'. El <b>margen de seguridad</b> es '+pct(R.mseg)+': las ventas podrían caer ese porcentaje antes de empezar a perder.</div>') : '')+
+  '</details>';
 }
 
 V.resultados = function(R){
@@ -760,7 +964,9 @@ V.resultados = function(R){
     '<div>Rompecabezas</div><div>'+R.cnt.Rompecabezas+'</div><div>Perros</div><div>'+R.cnt.Perro+'</div></div>'+
     '<div class="alert '+(R.fcReal<=p.fco?"ok":"bad")+'">'+(R.fcReal<=p.fco?"Food cost dentro de la meta.":"Food cost por encima de la meta: revisar porciones, mermas o precios.")+'</div>'+
     '<div class="alert '+(R.cap<0.6?"warn":R.cap>0.95?"bad":"ok")+'">'+(R.cap<0.6?"Hay capacidad ociosa: se puede vender más sin contratar.":R.cap>0.95?"La cocina está al límite de su capacidad.":"Uso adecuado de la capacidad de cocina.")+'</div>'+
-  '</div></div>'+ porCategoria(R);
+  '</div></div>'+
+  '<div class="card"><h3>Gráfica del punto de equilibrio</h3><p class="help">Donde la línea verde de ventas cruza la roja de costos totales, el restaurante deja de perder y empieza a ganar.</p>'+graficaPE(R)+explicaPE(R)+'</div>'+
+  porCategoria(R);
 };
 function porCategoria(R){
   if (!R.cats.length) return '';
@@ -785,9 +991,9 @@ function render(){
   document.getElementById("kpis").innerHTML =
     '<div class="kpi">Utilidad operacional<b>'+fCOP.format(R.uo)+'</b></div>'+
     '<div class="kpi">Food cost real<b>'+(R.fcReal*100).toFixed(1).replace(".",",")+' %</b></div>'+
-    '<div class="kpi">Platos con alerta<b>'+R.alertas+'</b></div>';
+    '<div class="kpi">'+negocio().prod[0]+' con alerta<b>'+R.alertas+'</b></div>';
   if (UI.tab === "clientes" && !CLOUD.admin) UI.tab = "inicio";
-  document.getElementById("nav").innerHTML = TABS.concat(CLOUD.admin ? [["clientes","Clientes (asesor)"]] : []).map(function(t){ return '<button role="tab" data-tab="'+t[0]+'" aria-selected="'+(UI.tab===t[0])+'">'+t[1]+'</button>'; }).join("");
+  document.getElementById("nav").innerHTML = TABS.concat(CLOUD.admin ? [["clientes","Clientes (asesor)"]] : []).map(function(t){ return '<button role="tab" data-tab="'+t[0]+'" aria-selected="'+(UI.tab===t[0])+'">'+(t[0]==="platos" ? negocio().prod[0] : t[1])+'</button>'; }).join("");
   document.getElementById("main").innerHTML = V[UI.tab](R);
   renderBanner(); renderDatalists(); renderCuenta();
 }
@@ -837,7 +1043,7 @@ main.addEventListener("click", function(e){
     if (w2 && Array.isArray(w2.obj)){ var i = w2.obj.findIndex(function(x){ return x.id===id; }); if (i>-1) w2.obj.splice(i,1); }
     save(); render();
   } else if (d.new){
-    if (d.new==="pl"){ var np = {id:uid(), codigo:nextCode(S.platos,"P-",2), nombre:"Nuevo plato", cat:"", porciones:1, minutos:5, precio:"", empaque:"", ventas:0, llevar:0, items:[]}; S.platos.push(np); UI.pl = np.id; }
+    if (d.new==="pl"){ var np = {id:uid(), codigo:nextCode(S.platos,"P-",2), nombre:"Nuevo "+negocio().prod[1], cat:"", porciones:1, minutos:5, precio:"", empaque:"", ventas:0, llevar:0, items:[]}; S.platos.push(np); UI.pl = np.id; }
     else { var ns = {id:uid(), codigo:nextCode(S.subrecetas,"SR-",2), nombre:"Nueva subreceta", unidad:"g", rendTotal:1000, minutos:10, items:[]}; S.subrecetas.push(ns); UI.sub = ns.id; }
     save(); render();
   } else if (d.dup){
@@ -848,7 +1054,7 @@ main.addEventListener("click", function(e){
   } else if (d.rm){
     var arr2 = d.rm==="pl" ? S.platos : S.subrecetas, cur2 = arr2.find(function(x){ return x.id===UI[d.rm]; });
     if (cur2 && confirm("¿Eliminar «"+(cur2.nombre||cur2.codigo)+"»?")){ arr2.splice(arr2.indexOf(cur2),1); UI[d.rm] = null; touch(); save(); render(); }
-  } else if (d.act){ acciones[d.act](); }
+  } else if (d.act){ acciones[d.act](d); }
 });
 document.getElementById("nav").addEventListener("click", function(e){
   var b = e.target.closest("button[data-tab]"); if (!b) return;
@@ -990,9 +1196,9 @@ var acciones = {
       var wb = XLSX.utils.book_new(), add = function(name, rows, widths){
         var ws = XLSX.utils.aoa_to_sheet(rows); if (widths) ws["!cols"] = widths.map(function(w){ return {wch:w}; }); XLSX.utils.book_append_sheet(wb, ws, name); };
       var r1 = function(v){ return Math.round(+v || 0); }, p1 = function(v){ return Math.round((+v || 0)*1000)/10; };
-      var menu = [["Código","Plato","Categoría","Precio de carta","Precio neto","Costo MP por porción","MOD por porción","CIF por porción","Costo de producción","Food cost %","Precio sugerido","Margen contribución en el local","Margen contribución para llevar","Margen bruto %","Unidades vendidas","Para llevar","Mix %","Clasificación","Qué hacer","Alerta"]];
+      var menu = [["Código","Plato","Categoría","Precio de carta","Precio neto","Costo MP por porción","MOD por porción","CIF por porción","Costo de producción","Food cost %","Precio sugerido","Margen contribución en el local","Margen contribución para llevar","Margen bruto %","Unidades vendidas","Para llevar","Le deja en el mes","Participación en ventas %","Clasificación","Qué hacer","Alerta"]];
       S.platos.forEach(function(x){ var r = R.pl[x.id];
-        menu.push([x.codigo, x.nombre, x.cat, N(x.precio), r1(r.neto), r1(r.mpPor), r1(r.mod), r1(r.cif), r1(r.costo), p1(r.fc), r.sug, r1(r.mc), r1(r.mcL), p1(r.mbp), N(x.ventas), N(x.llevar), p1(r.mix), r.clase ? CLASE[r.clase] : "", r.clase ? QUE[r.clase] : "", r.alerta]); });
+        menu.push([x.codigo, x.nombre, x.cat, N(x.precio), r1(r.neto), r1(r.mpPor), r1(r.mod), r1(r.cif), r1(r.costo), p1(r.fc), r.sug, r1(r.mc), r1(r.mcL), p1(r.mbp), N(x.ventas), N(x.llevar), r1(r.mcProm*N(x.ventas)), p1(r.mix), r.clase ? CLASE[r.clase] : "", r.clase ? QUE[r.clase] : "", r.alerta]); });
       add("Resumen del menú", menu, [9,30,16,13,13,13,12,12,13,10,13,14,14,10,11,10,8,18,50,45]);
       var res = [["Concepto","Valor"],["Restaurante", S.params.restaurante],["Mes", S.params.mes],[],
         ["Ventas netas de platos", r1(R.ventas)],["Ingresos por empaques cobrados", r1(R.ingEmp)],["(–) Costo de materia prima", -r1(R.cmp)],
@@ -1033,8 +1239,9 @@ var acciones = {
     });
   },
   print: function(){ window.print(); },
-  blank: function(){ if (confirm("Se borrarán los datos actuales de este navegador. ¿Descargó una copia? ¿Continuar?")){ S = blanco(); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); cloudQueue(); } },
-  demo: function(){ if (confirm("Se reemplazarán los datos actuales por el ejemplo. ¿Continuar?")){ S = ejemplo(); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); cloudQueue(); } },
+  tipo: function(d){ if (!d || !NEG[d.t]) return; S.params.tipo = d.t; touch(); save(); render(); },
+  blank: function(){ if (confirm("Se borrarán los datos actuales para empezar en blanco como "+negocio().label.toLowerCase()+". ¿Continuar?")){ S = blanco(); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); cloudQueue(); } },
+  demo: function(){ if (confirm("Se reemplazarán los datos actuales por el ejemplo de "+negocio().label.toLowerCase()+". ¿Continuar?")){ S = ejemplo(tipoDe(S)); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); cloudQueue(); } },
   login: function(){ abrirLogin(); },
   logout: function(){ if (confirm("¿Cerrar sesión? Sus datos quedan guardados en la nube.")) { flushCloud(); CLOUD.auth.signOut(); } },
   retry: function(){ CLOUD.lastJson = ""; cloudWrite(); },
