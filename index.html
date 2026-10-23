@@ -78,6 +78,23 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
 svg text{font-family:'Nunito Sans',Arial,sans-serif}
 footer{color:var(--muted);font-size:13px;padding:0 16px 30px}
 #banner:empty{display:none}
+.cuenta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+.cuenta .chip{background:rgba(255,255,255,.12);border-radius:999px;padding:6px 12px;color:#fff}
+.cuenta .chip b{font-weight:800}
+.cuenta .btn{border-color:#fff}
+.cuenta .btn.ghost{background:transparent;color:#fff}
+.cuenta .btn.light{background:#fff;color:var(--navy)}
+dialog{border:0;border-radius:16px;padding:0;max-width:min(520px,calc(100% - 32px));box-shadow:0 12px 40px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(15,25,40,.55)}
+.dlg{padding:20px;display:flex;flex-direction:column;gap:10px}
+.dlg h3{margin:0}
+.dlg label{display:block}
+.dlg .sep-or{text-align:center;color:var(--muted);font-size:13px;margin:4px 0}
+.dlg .chk{display:flex;gap:10px;align-items:flex-start;font-weight:600;color:var(--ink);font-size:14px}
+.dlg .chk input{width:auto;margin-top:3px}
+.pol{max-height:60vh;overflow:auto;font-size:14px;line-height:1.5}
+.pol h4{margin:12px 0 4px;color:var(--navy)}
+#banner.viendo{background:#DCEBFA;border-color:#B9D3EE;color:#14304F}
 .legal{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5}
 .legal p{margin:0 0 6px}
 .foot{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:16px}
@@ -104,6 +121,7 @@ a.btn{text-decoration:none;display:inline-block}
     <div class="top">
       <div class="brand"><small>Business Solutions</small><h1>Cuentas Claras</h1><div class="lema">Costos reales, precios justos y un negocio sin drama.</div><div class="cliente" id="ttl"></div></div>
       <div class="kpis" id="kpis"></div>
+      <div class="cuenta" id="cuenta"></div>
     </div>
     <nav role="tablist" id="nav"></nav>
   </div>
@@ -114,19 +132,78 @@ a.btn{text-decoration:none;display:inline-block}
   <div><b>Cuentas Claras</b>, de Business Solutions · Costos reales, precios justos y un negocio sin drama.<br>
   Creada por: <b>Daniel Humberto Narvaez Gallardo</b> · Economista</div>
   <div class="row"><a class="btn sm wa" href="https://wa.me/573156842617?text=Hola%20Daniel%2C%20vi%20la%20app%20Cuentas%20Claras%20y%20quiero%20informaci%C3%B3n%20sobre%20las%20asesor%C3%ADas%20de%20Business%20Solutions." target="_blank" rel="noopener">WhatsApp +57 315 684 2617</a>
-  <a class="btn sm ghost" href="mailto:danielhnarvaezgallardo@gmail.com">danielhnarvaezgallardo@gmail.com</a></div>
+  <a class="btn sm ghost" href="mailto:danielhnarvaezgallardo@gmail.com">danielhnarvaezgallardo@gmail.com</a>
+  <a class="btn sm ghost" href="#" data-pol>Política de tratamiento de datos</a></div>
 </div>
 <div class="legal">
-  <p><b>Aviso legal.</b> Cuentas Claras es una herramienta de apoyo para la toma de decisiones. Los resultados dependen de los datos ingresados por el usuario y no reemplazan la asesoría contable, tributaria, laboral o legal profesional. Los valores de referencia (salario mínimo, auxilio de transporte, jornada laboral, aportes, impuesto al consumo y exoneraciones) deben verificarse con la normativa vigente y con el contador del negocio. Los datos se guardan únicamente en el dispositivo del usuario; Business Solutions solo los recibe si el usuario decide enviarlos.</p>
+  <p><b>Aviso legal.</b> Cuentas Claras es una herramienta de apoyo para la toma de decisiones. Los resultados dependen de los datos ingresados por el usuario y no reemplazan la asesoría contable, tributaria, laboral o legal profesional. Los valores de referencia (salario mínimo, auxilio de transporte, jornada laboral, aportes, impuesto al consumo y exoneraciones) deben verificarse con la normativa vigente y con el contador del negocio. Sin iniciar sesión, los datos se guardan solo en el dispositivo del usuario. Si el usuario inicia sesión y lo autoriza, se guardan en la nube (Google Firebase) y pueden ser consultados por su asesor, según la Política de tratamiento de datos.</p>
   <p>© 2026 Daniel Humberto Narvaez Gallardo · Business Solutions. Todos los derechos reservados. Se prohíbe la reproducción, distribución o modificación de esta aplicación sin autorización escrita del autor.</p>
 </div></footer>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="dls" hidden></div>
+<dialog id="dlg-login"><div class="dlg">
+  <h3>Guardar en la nube</h3>
+  <p class="help" style="margin:0">Inicie sesión para que sus datos se guarden solos y pueda abrirlos desde cualquier celular o computador.</p>
+  <button type="button" class="btn" id="btn-google">Continuar con Google</button>
+  <div class="sep-or">o con su correo</div>
+  <label>Correo<input type="email" id="lg-email" autocomplete="email"></label>
+  <label>Contraseña (mínimo 6 caracteres)<input type="password" id="lg-pass" autocomplete="current-password"></label>
+  <div class="row"><button type="button" class="btn" id="btn-entrar">Entrar</button><button type="button" class="btn ghost" id="btn-crear">Crear cuenta</button><button type="button" class="btn sm ghost" id="btn-olvido">Olvidé mi contraseña</button></div>
+  <p id="lg-msg" class="miss" style="margin:0" aria-live="polite"></p>
+  <div class="row" style="justify-content:flex-end"><button type="button" class="btn sm ghost" id="btn-lg-cerrar">Cerrar</button></div>
+</div></dialog>
+<dialog id="dlg-consent"><div class="dlg">
+  <h3>Autorización para guardar sus datos</h3>
+  <p style="margin:0">Para guardar su información en la nube necesitamos su autorización. Sus datos se usarán solo para guardar su trabajo, permitirle verlo en otros dispositivos y que su asesor de Business Solutions pueda revisarlo y acompañarlo.</p>
+  <label class="chk"><input type="checkbox" id="cs-acepto"> <span>Autorizo a Daniel Humberto Narvaez Gallardo (Business Solutions) el tratamiento de mis datos según la <a href="#" data-pol>Política de tratamiento de datos</a>.</span></label>
+  <label class="chk"><input type="checkbox" id="cs-subir" checked> <span>Guardar en mi cuenta los datos que tengo ahora en este dispositivo.</span></label>
+  <div class="row"><button type="button" class="btn" id="cs-ok" disabled>Aceptar y guardar</button><button type="button" class="btn ghost" id="cs-no">No, seguir solo en este dispositivo</button></div>
+</div></dialog>
+<dialog id="dlg-pol"><div class="dlg">
+  <h3>Política de tratamiento de datos personales</h3>
+  <div class="pol">
+    <p>En cumplimiento de la Ley 1581 de 2012 y el Decreto 1377 de 2013 (compilado en el Decreto 1074 de 2015), se informa cómo se tratan los datos que usted registra en Cuentas Claras.</p>
+    <h4>1. Responsable</h4>
+    <p>Daniel Humberto Narvaez Gallardo, Business Solutions. Aguachica, Cesar, Colombia. Correo: danielhnarvaezgallardo@gmail.com. WhatsApp: +57 315 684 2617.</p>
+    <h4>2. Datos que se tratan</h4>
+    <p>Correo electrónico y nombre de la cuenta; información del negocio que usted registra (insumos, precios, recetas, ventas, costos y gastos); cargos, formas de pago y salarios del personal. Se recomienda no registrar nombres ni documentos de identidad de los trabajadores. La aplicación no solicita datos sensibles.</p>
+    <h4>3. Finalidades</h4>
+    <p>a) Guardar y sincronizar su información entre dispositivos. b) Permitir que el asesor la consulte, revise y, si usted lo solicita, la corrija, para brindarle acompañamiento. c) Generar informes de costos y resultados. d) Contactarlo en relación con la asesoría. e) Elaborar estadísticas agregadas y anónimas que no permiten identificar a ningún negocio.</p>
+    <h4>4. Encargado y transferencia</h4>
+    <p>La información se almacena en Google Firebase (Google LLC), cuyos servidores pueden estar fuera de Colombia. Al aceptar, usted autoriza esa transmisión, que se realiza con las medidas de seguridad del proveedor.</p>
+    <h4>5. Sus derechos</h4>
+    <p>Conocer, actualizar y rectificar sus datos; solicitar prueba de la autorización; ser informado sobre su uso; revocar la autorización o pedir que se supriman; presentar quejas ante la Superintendencia de Industria y Comercio, y acceder gratuitamente a sus datos. Puede eliminar sus datos de la nube en cualquier momento desde la pestaña Inicio.</p>
+    <h4>6. Cómo ejercerlos</h4>
+    <p>Escriba a danielhnarvaezgallardo@gmail.com. Las consultas se atienden en un máximo de 10 días hábiles y los reclamos en 15 días hábiles, según la ley.</p>
+    <h4>7. Vigencia</h4>
+    <p>Esta política rige desde octubre de 2026. Los datos se conservarán mientras exista la cuenta o hasta que usted solicite su supresión.</p>
+  </div>
+  <div class="row" style="justify-content:flex-end"><button type="button" class="btn" id="btn-pol-cerrar">Entendido</button></div>
+</div></dialog>
 
 <script>
 (function(){
 "use strict";
 var KEY = "costeoRestaurante.v1", UIKEY = "costeoRestaurante.ui";
+
+// =====================================================================
+//  CONFIGURACIÓN DE LA NUBE (Firebase)
+//  Pegue aquí los datos de su proyecto (Configuración del proyecto → Tus apps → Web).
+//  Si se dejan vacíos, la app funciona igual que antes, guardando solo en el dispositivo.
+// =====================================================================
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDdMrfyKquBdK4u4d1N8KYzv1vmVlCWWL0",
+  authDomain: "cuentas-claras-restaurant.firebaseapp.com",
+  projectId: "cuentas-claras-restaurant",
+  storageBucket: "cuentas-claras-restaurant.firebasestorage.app",
+  messagingSenderId: "731936701225",
+  appId: "1:731936701225:web:e1dacff4a0e507254bd538"
+};
+// Correos de los asesores que pueden ver a todos los clientes (deben entrar con Google).
+var ADMINS = ["danielhnarvaezgallardo@gmail.com"];
+var FB_VER = "10.12.2";
+var CLOUD = {on:false, ready:false, user:null, admin:false, docId:null, viewing:null, status:"local", saved:0, timer:null,
+             unsub:null, unsubList:null, lastJson:"", remote:null, clientes:[], err:""};
 var TABS = [["inicio","Inicio"],["parametros","Parámetros"],["insumos","Insumos"],["subrecetas","Subrecetas"],["platos","Platos"],
             ["personal","Personal"],["cif","CIF y gastos"],["menu","Menú"],["resultados","Resultados"]];
 function uid(){ return Math.random().toString(36).slice(2,10); }
@@ -193,11 +270,11 @@ try { S = JSON.parse(localStorage.getItem(KEY)); } catch(e){ S = null; }
 if (!S || !S.params) S = ejemplo();
 try { UI = JSON.parse(localStorage.getItem(UIKEY)) || {}; } catch(e){ UI = {}; }
 UI.tab = UI.tab || "inicio";
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(UIKEY, JSON.stringify(UI)); } catch(e){} }
+function save(){ try { if (!CLOUD.viewing) localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(UIKEY, JSON.stringify(UI)); } catch(e){} }
 var METAKEY = "costeoRestaurante.meta", META;
 try { META = JSON.parse(localStorage.getItem(METAKEY)) || {}; } catch(e){ META = {}; }
 function saveMeta(){ try { localStorage.setItem(METAKEY, JSON.stringify(META)); } catch(e){} }
-function touch(){ META.changed = Date.now(); if (!META.pending) META.pending = META.changed; saveMeta(); }
+function touch(){ META.changed = Date.now(); if (!META.pending) META.pending = META.changed; saveMeta(); cloudQueue(); }
 function markBackup(){ META.backup = Date.now(); META.pending = null; saveMeta(); renderBanner(); }
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
 function fecha(t){ return t ? new Date(t).toLocaleString("es-CO",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}) : "nunca"; }
@@ -215,7 +292,14 @@ function renderDatalists(){
 }
 function renderBanner(){
   var b = document.getElementById("banner"); if (!b) return;
-  var old = META.pending && (Date.now() - META.pending > 864e5);
+  if (CLOUD.viewing){
+    b.className = "viendo";
+    b.innerHTML = '<div class="wrap"><span>Está viendo los datos de <b>'+esc(CLOUD.viewing.restaurante||"cliente")+'</b> ('+esc(CLOUD.viewing.email||"")+'). Los cambios que haga se guardan en la cuenta del cliente.</span>'+
+      '<span class="row"><button class="btn sm" data-act="mios">Volver a mis datos</button></span></div>';
+    return;
+  }
+  b.className = "";
+  var old = META.pending && (Date.now() - META.pending > 864e5) && !(CLOUD.user && CLOUD.status === "ok");
   b.innerHTML = old ? '<div class="wrap"><span><b>Tiene cambios sin respaldar desde el '+fecha(META.pending)+'</b> · Envíe o descargue una copia para no perderlos.</span>'+
     '<span class="row"><button class="btn sm wa" data-act="share">Enviar al asesor por WhatsApp</button><button class="btn sm ghost" data-act="export">Descargar copia</button></span></div>' : "";
 }
@@ -237,11 +321,19 @@ function calc(){
   R.horasMes = N(p.jornada)*52/12;
   var exo = p.exo ? 0 : 1, mod=0, min=0, gp=0, sal=0, tot=0;
   R.personal = S.personal.map(function(x){
-    var s = N(x.salario), a = s>0 && s<=2*N(p.smmlv) ? N(p.aux) : 0;
-    var d = {aux:a, ces:(s+a)*.0833, int:(s+a)*.01, prima:(s+a)*.0833, vac:s*.0417, salud:s*.085*exo, pens:s*.12, arl:s*N(p.arl),
-             caja:s*.04, icbf:s*.03*exo, sena:s*.02*exo};
+    var turnos = x.tipo === "turnos", prest = turnos ? !!x.prest : true, s, a, horas;
+    if (turnos){
+      s = N(x.turno)*N(x.nturnos);                                   // lo que se le paga en el mes
+      a = prest && N(x.turno)*30 <= 2*N(p.smmlv) ? N(p.aux)/30*N(x.nturnos) : 0;   // auxilio proporcional a los días
+      horas = N(x.nturnos)*N(x.horas);
+    } else {
+      s = N(x.salario); a = s>0 && s<=2*N(p.smmlv) ? N(p.aux) : 0; horas = s>0 ? R.horasMes : 0;
+    }
+    var k = prest ? 1 : 0;
+    var d = {aux:a, ces:(s+a)*.0833*k, int:(s+a)*.01*k, prima:(s+a)*.0833*k, vac:s*.0417*k, salud:s*.085*exo*k, pens:s*.12*k, arl:s*N(p.arl)*k,
+             caja:s*.04*k, icbf:s*.03*exo*k, sena:s*.02*exo*k, dev:s, horas:horas};
     d.total = s + d.aux+d.ces+d.int+d.prima+d.vac+d.salud+d.pens+d.arl+d.caja+d.icbf+d.sena;
-    d.prod = d.total*N(x.ded); d.gasto = d.total-d.prod; d.min = s>0 ? R.horasMes*N(p.efic)*60*N(x.ded) : 0;
+    d.prod = d.total*N(x.ded); d.gasto = d.total-d.prod; d.min = horas*N(p.efic)*60*N(x.ded);
     mod+=d.prod; min+=d.min; gp+=d.gasto; sal+=s; tot+=d.total; return d;
   });
   R.modMes=mod; R.minMes=min; R.persGasto=gp; R.modMin = min ? mod/min : 0; R.factor = sal ? tot/sal : 0; R.persTotal=tot;
@@ -390,6 +482,7 @@ V.inicio = function(R){
   '<li><b>CIF y gastos:</b> servicios, arriendo, depreciación de equipos y gastos de administración.</li>'+
   '<li><b>Menú:</b> unidades vendidas en el mes de cada plato, para la ingeniería de menú.</li>'+
   '<li><b>Resultados:</b> estado de resultados, punto de equilibrio e indicadores.</li></ol></div>'+
+  tarjetaNube()+
   '<div class="card"><h3>Guardar y compartir los datos</h3><p class="help">Los datos se guardan en este navegador mientras no se borre el historial. Para no perderlos y para mostrarle el avance al asesor, envíe o descargue una copia con frecuencia. «Cargar datos» acepta esa copia o la <b>plantilla de Excel</b> llena.</p>'+
   '<div class="status">Último respaldo: <b>'+fecha(META.backup)+'</b>'+(META.pending ? ' · <span class="miss">hay cambios sin respaldar</span>' : (META.backup ? ' · todo respaldado' : ''))+'</div>'+
   '<div class="toolbar">'+
@@ -532,18 +625,35 @@ V.platos = function(R){
 };
 
 V.personal = function(R){
-  var a = ["Cocina","Servicio","Administración"];
-  return '<h2>Personal y mano de obra directa</h2><p class="help">Incluya a todo el personal, también al dueño si trabaja: asígnele un salario, porque su trabajo también cuesta. Las prestaciones se calculan sobre salario + auxilio; vacaciones y aportes, sobre el salario básico.</p>'+
-  list("personal", S.personal, [
-    {h:"Cargo", f:"cargo", w:170}, {h:"Área", f:"area", opts:a},
-    {h:"Salario básico", f:"salario", t:"num", w:120},
-    {h:"% dedicación a producción", f:"ded", t:"pct", w:90},
-    {h:"Costo total mes", r:1, calc:function(x,i){ return money(R.personal[i].total); }},
-    {h:"A producción (MOD)", r:1, calc:function(x,i){ return money(R.personal[i].prod); }},
-    {h:"A gastos", r:1, calc:function(x,i){ return money(R.personal[i].gasto); }},
-    {h:"Minutos productivos", r:1, calc:function(x,i){ return num(R.personal[i].min); }}
-  ], '<td colspan="4">Total</td><td class="r">'+money(R.persTotal)+'</td><td class="r">'+money(R.modMes)+'</td><td class="r">'+money(R.persGasto)+'</td><td class="r">'+num(R.minMes)+'</td>')+
-  '<div class="grid3"><div class="stat"><div class="k">Costo de MOD por minuto</div><div class="v">'+money2(R.modMin)+'</div></div>'+
+  var areas = ["Cocina","Servicio","Administración"];
+  var rows = S.personal.map(function(x, i){
+    var q = R.personal[i], P = "personal."+x.id+".", tur = x.tipo === "turnos";
+    var pago = tur
+      ? '<div class="row" style="flex-wrap:nowrap;gap:6px">'+inp(P+"turno",x.turno,"num",'placeholder="Valor del turno" aria-label="Valor por turno"')+
+        '<span class="muted">×</span>'+inp(P+"nturnos",x.nturnos,"num",'placeholder="Turnos" aria-label="Turnos al mes" style="max-width:80px"')+'</div>'+
+        '<div class="muted" style="font-size:12px;margin-top:3px">Valor por turno × turnos al mes = '+fCOP.format(q.dev)+'</div>'
+      : inp(P+"salario",x.salario,"num",'aria-label="Salario mensual"')+'<div class="muted" style="font-size:12px;margin-top:3px">Salario mensual</div>';
+    var horas = tur
+      ? inp(P+"horas",x.horas,"num",'aria-label="Horas por turno"')+'<div class="muted" style="font-size:12px;margin-top:3px">horas por turno</div>'
+      : '<div class="muted" style="font-size:13px">Jornada legal<br>'+num(R.horasMes)+' h/mes</div>';
+    var prest = tur
+      ? sel(P+"prest", x.prest?"1":"0", [["0","No"],["1","Sí"]], "bool")
+      : '<div class="muted" style="font-size:13px">Sí</div>';
+    return '<tr><td style="min-width:170px">'+inp(P+"cargo",x.cargo)+'</td><td style="min-width:140px">'+sel(P+"area",x.area,areas)+'</td>'+
+      '<td style="min-width:155px">'+sel(P+"tipo",x.tipo||"mensual",[["mensual","Salario mensual"],["turnos","Por turnos"]])+'</td>'+
+      '<td style="min-width:220px">'+pago+'</td><td style="min-width:90px">'+horas+'</td><td style="min-width:80px">'+prest+'</td>'+
+      '<td style="min-width:80px">'+inp(P+"ded",x.ded,"pct")+'</td>'+
+      '<td class="r calc">'+money(q.total)+'</td><td class="r calc">'+money(q.prod)+'</td><td class="r calc">'+money(q.gasto)+'</td><td class="r calc">'+num(q.min)+'</td>'+
+      '<td><button class="btn sm del" data-del="personal.'+x.id+'" aria-label="Eliminar">×</button></td></tr>';
+  }).join("");
+  return '<h2>Personal y mano de obra directa</h2><p class="help">Incluya a todo el personal, también al dueño si trabaja: asígnele un pago, porque su trabajo también cuesta. Para cada persona elija si se le paga <b>salario mensual</b> o <b>por turnos</b>. En pago por turnos indique el valor del turno, cuántos turnos trabaja al mes, cuántas horas dura cada turno y si se le pagan prestaciones y seguridad social.</p>'+
+  '<div class="tw"><table><thead><tr><th>Cargo</th><th>Área</th><th>Forma de pago</th><th>Pago</th><th>Horas</th><th>Prestaciones</th><th>% a producción</th>'+
+  '<th class="r">Costo total mes</th><th class="r">A producción (MOD)</th><th class="r">A gastos</th><th class="r">Minutos productivos</th><th></th></tr></thead><tbody>'+
+  (rows || '<tr><td colspan="12" class="muted" style="text-align:center;padding:16px">Sin registros. Use el botón «Agregar».</td></tr>')+
+  '<tr class="total"><td colspan="7">Total</td><td class="r">'+money(R.persTotal)+'</td><td class="r">'+money(R.modMes)+'</td><td class="r">'+money(R.persGasto)+'</td><td class="r">'+num(R.minMes)+'</td><td></td></tr>'+
+  '</tbody></table></div><div class="toolbar"><button class="btn sm" data-add="personal">+ Agregar</button></div>'+
+  '<div class="alert warn" style="font-weight:600">Si quien trabaja por turnos tiene una relación laboral (horario, subordinación, pago periódico), la ley exige pagarle prestaciones y seguridad social en proporción al tiempo trabajado. Marque «Sí» en Prestaciones para ver el costo real. Confírmelo con el contador.</div>'+
+  '<div class="grid3" style="margin-top:16px"><div class="stat"><div class="k">Costo de MOD por minuto</div><div class="v">'+money2(R.modMin)+'</div></div>'+
   '<div class="stat"><div class="k">Minutos productivos de cocina al mes</div><div class="v">'+num(R.minMes)+'</div></div>'+
   '<div class="stat"><div class="k">Factor prestacional promedio</div><div class="v">'+num(R.factor)+'</div></div></div>';
 };
@@ -676,9 +786,10 @@ function render(){
     '<div class="kpi">Utilidad operacional<b>'+fCOP.format(R.uo)+'</b></div>'+
     '<div class="kpi">Food cost real<b>'+(R.fcReal*100).toFixed(1).replace(".",",")+' %</b></div>'+
     '<div class="kpi">Platos con alerta<b>'+R.alertas+'</b></div>';
-  document.getElementById("nav").innerHTML = TABS.map(function(t){ return '<button role="tab" data-tab="'+t[0]+'" aria-selected="'+(UI.tab===t[0])+'">'+t[1]+'</button>'; }).join("");
+  if (UI.tab === "clientes" && !CLOUD.admin) UI.tab = "inicio";
+  document.getElementById("nav").innerHTML = TABS.concat(CLOUD.admin ? [["clientes","Clientes (asesor)"]] : []).map(function(t){ return '<button role="tab" data-tab="'+t[0]+'" aria-selected="'+(UI.tab===t[0])+'">'+t[1]+'</button>'; }).join("");
   document.getElementById("main").innerHTML = V[UI.tab](R);
-  renderBanner(); renderDatalists();
+  renderBanner(); renderDatalists(); renderCuenta();
 }
 document.getElementById("banner").addEventListener("click", function(e){ var b = e.target.closest("button[data-act]"); if (b) acciones[b.dataset.act](); });
 function rerenderKeepFocus(){
@@ -706,7 +817,7 @@ function nextCode(arr, prefix, digits){
 }
 var NEW = {
   insumos: function(){ return {id:uid(), codigo:nextCode(S.insumos,"INS-",3), nombre:"", cat:"", unidad:"g", cont:1000, precio:"", rend:1}; },
-  personal: function(){ return {id:uid(), cargo:"", area:"Cocina", salario:S.params.smmlv, ded:1}; },
+  personal: function(){ return {id:uid(), cargo:"", area:"Cocina", tipo:"mensual", salario:"", turno:"", nturnos:"", horas:8, prest:false, ded:1}; },
   cif: function(){ return {id:uid(), rubro:"", valor:"", pct:1}; },
   equipos: function(){ return {id:uid(), nombre:"", valor:"", vida:10, pct:1}; },
   gastos: function(){ return {id:uid(), concepto:"", valor:""}; }
@@ -760,7 +871,7 @@ function loadXLSX(cb){
 }
 function aplicar(d){
   var b = blanco(); S = Object.assign(b, d); S.params = Object.assign(b.params, d.params || {});
-  UI.pl = null; UI.sub = null; META.pending = null; META.changed = Date.now(); saveMeta(); save(); render();
+  UI.pl = null; UI.sub = null; META.pending = null; META.changed = Date.now(); saveMeta(); save(); render(); cloudQueue();
 }
 function leerPlantilla(wb){
   if (!wb.Sheets.Parametros || !wb.Sheets.Insumos || !wb.Sheets.Platos) throw new Error("No es la plantilla de costeo.");
@@ -806,7 +917,7 @@ function leerPlantilla(wb){
   for (r = 6; r <= a.length; r++){
     if (t(c(a, r, 1)) === "TOTAL") break;
     var cg = t(c(a, r, 1)), sal = N(c(a, r, 3));
-    if (cg || sal) d.personal.push({id:uid(), cargo:cg, area:t(c(a, r, 2)) || "Cocina", salario:sal, ded:N(c(a, r, 4))});
+    if (cg || sal) d.personal.push({id:uid(), cargo:cg, area:t(c(a, r, 2)) || "Cocina", tipo:"mensual", salario:sal, turno:"", nturnos:"", horas:8, prest:false, ded:N(c(a, r, 4))});
   }
   a = sh("CIF");
   for (r = 5; r <= a.length; r++){
@@ -911,8 +1022,10 @@ var acciones = {
       var subs = [["Código","Subreceta","Unidad","Rendimiento total","Minutos del lote","Ingrediente","Cantidad"]];
       S.subrecetas.forEach(function(sr){ sr.items.forEach(function(it){ var i = R.ins[it.code]; subs.push([sr.codigo, sr.nombre, sr.unidad, N(sr.rendTotal), N(sr.minutos), (it.code||"")+" · "+(i?i.nombre:""), N(it.qty)]); }); });
       add("Subrecetas", subs, [9,24,8,14,13,36,10]);
-      add("Personal", [["Cargo","Área","Salario básico","% dedicación","Costo total mes","A producción","A gastos"]].concat(
-        S.personal.map(function(x, i){ var q = R.personal[i]; return [x.cargo, x.area, N(x.salario), p1(x.ded), r1(q.total), r1(q.prod), r1(q.gasto)]; })), [24,14,14,12,14,14,14]);
+      add("Personal", [["Cargo","Área","Forma de pago","Salario mensual","Valor por turno","Turnos al mes","Horas por turno","Prestaciones","Pago del mes","% dedicación","Costo total mes","A producción","A gastos"]].concat(
+        S.personal.map(function(x, i){ var q = R.personal[i], tur = x.tipo === "turnos";
+          return [x.cargo, x.area, tur ? "Por turnos" : "Salario mensual", tur ? "" : N(x.salario), tur ? N(x.turno) : "", tur ? N(x.nturnos) : "", tur ? N(x.horas) : "",
+                  tur ? (x.prest ? "Sí" : "No") : "Sí", r1(q.dev), p1(x.ded), r1(q.total), r1(q.prod), r1(q.gasto)]; })), [24,14,16,14,13,12,12,12,14,12,14,14,14]);
       add("CIF y gastos", [["Rubro","Valor mensual","% cocina"]].concat(S.cif.map(function(x){ return [x.rubro, N(x.valor), p1(x.pct)]; }),
         [[],["Equipo","Valor de compra","Vida útil (años)","% cocina"]], S.equipos.map(function(x){ return [x.nombre, N(x.valor), N(x.vida), p1(x.pct)]; }),
         [[],["Otro gasto fijo","Valor mensual"]], S.gastos.map(function(x){ return [x.concepto, N(x.valor)]; })), [36,16,14,10]);
@@ -920,11 +1033,244 @@ var acciones = {
     });
   },
   print: function(){ window.print(); },
-  blank: function(){ if (confirm("Se borrarán los datos actuales de este navegador. ¿Descargó una copia? ¿Continuar?")){ S = blanco(); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); } },
-  demo: function(){ if (confirm("Se reemplazarán los datos actuales por el ejemplo. ¿Continuar?")){ S = ejemplo(); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); } }
+  blank: function(){ if (confirm("Se borrarán los datos actuales de este navegador. ¿Descargó una copia? ¿Continuar?")){ S = blanco(); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); cloudQueue(); } },
+  demo: function(){ if (confirm("Se reemplazarán los datos actuales por el ejemplo. ¿Continuar?")){ S = ejemplo(); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); cloudQueue(); } },
+  login: function(){ abrirLogin(); },
+  logout: function(){ if (confirm("¿Cerrar sesión? Sus datos quedan guardados en la nube.")) { flushCloud(); CLOUD.auth.signOut(); } },
+  retry: function(){ CLOUD.lastJson = ""; cloudWrite(); },
+  mios: function(){ volverPropio(); },
+  borrarNube: function(){
+    if (!CLOUD.user || CLOUD.viewing) return;
+    if (!confirm("Se eliminarán sus datos de la nube. Quedará una copia solo en este dispositivo. ¿Continuar?")) return;
+    stopDoc(); clearTimeout(CLOUD.timer);
+    ref(CLOUD.user.uid).delete().then(function(){ toast("Sus datos fueron eliminados de la nube. Se cerró la sesión."); CLOUD.auth.signOut(); })
+      .catch(function(e){ toast("No se pudieron eliminar: "+e.message); });
+  }
+};
+
+// ===================== NUBE (Firebase) =====================
+function cloudConfigured(){ return !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId); }
+function ref(id){ return CLOUD.db.collection("negocios").doc(id); }
+function ts(t){ return t && t.toMillis ? t.toMillis() : (+t || 0); }
+function hora(t){ return t ? new Date(t).toLocaleString("es-CO",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "—"; }
+function loadScripts(list, cb){
+  var i = 0;
+  (function next(){
+    if (i >= list.length) return cb();
+    var sc = document.createElement("script"); sc.src = list[i++]; sc.onload = next;
+    sc.onerror = function(){ CLOUD.status = "error"; CLOUD.err = "No se pudo conectar con el servicio de la nube."; renderCuenta(); };
+    document.head.appendChild(sc);
+  })();
+}
+function initCloud(){
+  if (!cloudConfigured()) return;
+  CLOUD.status = "conectando"; renderCuenta();
+  var base = "https://www.gstatic.com/firebasejs/" + FB_VER + "/";
+  loadScripts([base+"firebase-app-compat.js", base+"firebase-auth-compat.js", base+"firebase-firestore-compat.js"], function(){
+    try {
+      firebase.initializeApp(FIREBASE_CONFIG);
+      CLOUD.auth = firebase.auth(); CLOUD.auth.languageCode = "es";
+      CLOUD.db = firebase.firestore();
+      try { CLOUD.db.enablePersistence({synchronizeTabs:true}).catch(function(){}); } catch(e){}
+      CLOUD.on = true;
+      CLOUD.auth.onAuthStateChanged(onUser);
+    } catch(e){ CLOUD.status = "error"; CLOUD.err = e.message; renderCuenta(); }
+  });
+}
+function stopDoc(){ if (CLOUD.unsub){ CLOUD.unsub(); CLOUD.unsub = null; } }
+function stopList(){ if (CLOUD.unsubList){ CLOUD.unsubList(); CLOUD.unsubList = null; } }
+function onUser(u){
+  CLOUD.user = u; CLOUD.ready = true;
+  CLOUD.admin = !!(u && u.email && ADMINS.map(function(x){ return x.toLowerCase(); }).indexOf(u.email.toLowerCase()) > -1);
+  stopDoc(); stopList(); CLOUD.viewing = null; CLOUD.lastJson = "";
+  if (!u){
+    CLOUD.docId = null; CLOUD.status = "local";
+    try { var loc = JSON.parse(localStorage.getItem(KEY)); if (loc && loc.params) S = Object.assign(blanco(), loc); } catch(e){}
+    render(); return;
+  }
+  cerrarDlg("dlg-login");
+  abrirPropio();
+}
+function abrirPropio(){
+  var u = CLOUD.user; CLOUD.docId = u.uid; CLOUD.viewing = null; CLOUD.status = "cargando"; renderCuenta();
+  ref(u.uid).get().then(function(snap){
+    var d = snap.exists ? snap.data() : null;
+    if (d && d.json){
+      cargarJson(d.json); CLOUD.status = "ok"; CLOUD.saved = ts(d.actualizado);
+      escuchar(); if (CLOUD.admin) escucharClientes(); UI.pl = null; UI.sub = null; render();
+    } else pedirConsentimiento();
+  }).catch(function(e){ CLOUD.status = "error"; CLOUD.err = e.message; renderCuenta(); });
+}
+function cargarJson(j){
+  try { var d = JSON.parse(j), b = blanco(); S = Object.assign(b, d); S.params = Object.assign(b.params, d.params || {}); CLOUD.lastJson = j; save(); } catch(e){}
+}
+function resumenNube(){
+  var r = calc();
+  return {uo:Math.round(r.uo), fc:Math.round(r.fcReal*1000)/1000, alertas:r.alertas, ingresos:Math.round(r.ingresos), platos:S.platos.length};
+}
+function pedirConsentimiento(){
+  CLOUD.status = "consent"; renderCuenta();
+  var d = document.getElementById("dlg-consent"), ok = document.getElementById("cs-ok"), ac = document.getElementById("cs-acepto");
+  ac.checked = false; ok.disabled = true;
+  ac.onchange = function(){ ok.disabled = !ac.checked; };
+  ok.onclick = function(){
+    if (!document.getElementById("cs-subir").checked){ S = blanco(); UI.pl = null; UI.sub = null; }
+    var u = CLOUD.user, j = JSON.stringify(S), FV = firebase.firestore.FieldValue;
+    ok.disabled = true;
+    ref(u.uid).set({uid:u.uid, email:u.email || "", nombre:u.displayName || "", json:j, restaurante:S.params.restaurante || "",
+      resumen:resumenNube(), consentimiento:{acepto:true, version:"1.0", fecha:FV.serverTimestamp(), agente:navigator.userAgent.slice(0,200)},
+      creado:FV.serverTimestamp(), actualizado:FV.serverTimestamp(), editadoPor:u.email || ""})
+    .then(function(){ CLOUD.lastJson = j; CLOUD.status = "ok"; CLOUD.saved = Date.now(); cerrarDlg("dlg-consent"); escuchar(); if (CLOUD.admin) escucharClientes(); save(); render(); toast("Listo: sus datos se guardarán solos en la nube."); })
+    .catch(function(e){ ok.disabled = false; toast("No se pudo guardar: "+e.message); });
+  };
+  document.getElementById("cs-no").onclick = function(){ cerrarDlg("dlg-consent"); CLOUD.auth.signOut(); toast("Sus datos siguen guardados solo en este dispositivo."); };
+  d.oncancel = function(ev){ ev.preventDefault(); document.getElementById("cs-no").click(); };
+  abrirDlg("dlg-consent");
+}
+function cloudQueue(){
+  if (!CLOUD.on || !CLOUD.user || !CLOUD.docId || CLOUD.status === "consent" || CLOUD.status === "cargando") return;
+  CLOUD.status = "pendiente"; renderCuenta();
+  clearTimeout(CLOUD.timer); CLOUD.timer = setTimeout(cloudWrite, 1500);
+}
+function flushCloud(){ if (CLOUD.timer){ clearTimeout(CLOUD.timer); CLOUD.timer = null; cloudWrite(); } }
+function cloudWrite(){
+  CLOUD.timer = null;
+  if (!CLOUD.on || !CLOUD.user || !CLOUD.docId) return;
+  var j = JSON.stringify(S);
+  if (j === CLOUD.lastJson){ CLOUD.status = "ok"; renderCuenta(); return; }
+  CLOUD.lastJson = j; CLOUD.status = "guardando"; renderCuenta();
+  var id = CLOUD.docId;
+  ref(id).set({json:j, restaurante:S.params.restaurante || "", resumen:resumenNube(),
+    actualizado:firebase.firestore.FieldValue.serverTimestamp(), editadoPor:CLOUD.user.email || ""}, {merge:true})
+  .then(function(){ if (CLOUD.docId === id){ CLOUD.status = CLOUD.timer ? "pendiente" : "ok"; CLOUD.saved = Date.now(); META.pending = null; saveMeta(); renderCuenta(); } })
+  .catch(function(e){ CLOUD.status = "error"; CLOUD.err = e.message; CLOUD.lastJson = ""; renderCuenta(); });
+}
+function editando(){ var a = document.activeElement; return !!(a && main.contains(a) && /INPUT|SELECT|TEXTAREA/.test(a.tagName)); }
+function escuchar(){
+  stopDoc();
+  CLOUD.unsub = ref(CLOUD.docId).onSnapshot(function(snap){
+    if (!snap.exists || snap.metadata.hasPendingWrites) return;
+    var d = snap.data(); if (!d.json || d.json === CLOUD.lastJson) return;
+    if (CLOUD.timer || CLOUD.status === "guardando") return;      // hay cambios locales: se conservan los del usuario
+    if (editando()){ CLOUD.remote = d.json; return; }
+    aplicarRemoto(d.json, d.editadoPor);
+  }, function(){});
+}
+function aplicarRemoto(j, quien){
+  cargarJson(j); CLOUD.remote = null; render();
+  toast("Se cargaron cambios recientes" + (quien && CLOUD.user && quien !== CLOUD.user.email ? " hechos por " + quien : " desde otro dispositivo") + ".");
+}
+main.addEventListener("focusout", function(){ setTimeout(function(){ if (CLOUD.remote && !editando() && !CLOUD.timer) aplicarRemoto(CLOUD.remote); }, 400); });
+function escucharClientes(){
+  if (CLOUD.unsubList) return;
+  CLOUD.unsubList = CLOUD.db.collection("negocios").orderBy("actualizado", "desc").onSnapshot(function(qs){
+    CLOUD.clientes = qs.docs.map(function(d){ return Object.assign({id:d.id}, d.data()); });
+    if (UI.tab === "clientes" && !editando()) render();
+  }, function(e){ CLOUD.errList = e.message; if (UI.tab === "clientes") render(); });
+}
+function abrirCliente(id){
+  if (!CLOUD.admin) return;
+  if (id === CLOUD.user.uid){ volverPropio(); return; }
+  flushCloud(); stopDoc();
+  var c = CLOUD.clientes.find(function(x){ return x.id === id; }) || {};
+  CLOUD.viewing = {id:id, restaurante:c.restaurante, email:c.email}; CLOUD.docId = id; CLOUD.status = "cargando"; renderCuenta();
+  ref(id).get().then(function(snap){
+    var d = snap.data() || {};
+    cargarJson(d.json || JSON.stringify(blanco())); CLOUD.status = "ok"; CLOUD.saved = ts(d.actualizado);
+    escuchar(); UI.tab = "resultados"; UI.pl = null; UI.sub = null; render(); window.scrollTo(0, 0);
+  }).catch(function(e){ CLOUD.status = "error"; CLOUD.err = e.message; render(); });
+}
+function volverPropio(){ flushCloud(); stopDoc(); CLOUD.viewing = null; UI.tab = "clientes"; abrirPropio(); }
+function abrirDlg(id){ var d = document.getElementById(id); try { if (!d.open) d.showModal(); } catch(e){ d.setAttribute("open", ""); } }
+function cerrarDlg(id){ var d = document.getElementById(id); try { if (d.open) d.close(); } catch(e){ d.removeAttribute("open"); } }
+var ERR = {"auth/invalid-email":"El correo no es válido.","auth/user-not-found":"No hay una cuenta con ese correo. Use «Crear cuenta».",
+  "auth/wrong-password":"La contraseña no es correcta.","auth/invalid-credential":"Correo o contraseña incorrectos.",
+  "auth/invalid-login-credentials":"Correo o contraseña incorrectos.","auth/email-already-in-use":"Ya existe una cuenta con ese correo. Use «Entrar».",
+  "auth/weak-password":"La contraseña debe tener al menos 6 caracteres.","auth/popup-closed-by-user":"Se cerró la ventana de Google antes de terminar.",
+  "auth/unauthorized-domain":"Este sitio no está autorizado en Firebase (agregue el dominio en Authentication → Configuración).",
+  "auth/network-request-failed":"Sin conexión a internet. Intente de nuevo.","auth/too-many-requests":"Demasiados intentos. Espere unos minutos.",
+  "auth/missing-password":"Escriba la contraseña.","auth/operation-not-allowed":"Este método de inicio de sesión no está activado en Firebase."};
+function msgErr(e){ return ERR[e && e.code] || (e && e.message) || "Ocurrió un error."; }
+function abrirLogin(){
+  if (!CLOUD.on){ toast("La nube todavía no está disponible. Revise la conexión."); return; }
+  document.getElementById("lg-msg").textContent = ""; abrirDlg("dlg-login");
+}
+(function(){
+  var $id = function(x){ return document.getElementById(x); }, msg = function(t){ $id("lg-msg").textContent = t; };
+  var em = function(){ return $id("lg-email").value.trim(); }, pw = function(){ return $id("lg-pass").value; };
+  $id("btn-google").onclick = function(){
+    var prov = new firebase.auth.GoogleAuthProvider(); prov.setCustomParameters({prompt:"select_account"});
+    CLOUD.auth.signInWithPopup(prov).catch(function(e){
+      if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") CLOUD.auth.signInWithRedirect(prov);
+      else msg(msgErr(e));
+    });
+  };
+  $id("btn-entrar").onclick = function(){ msg("Entrando…"); CLOUD.auth.signInWithEmailAndPassword(em(), pw()).catch(function(e){ msg(msgErr(e)); }); };
+  $id("btn-crear").onclick = function(){ msg("Creando la cuenta…"); CLOUD.auth.createUserWithEmailAndPassword(em(), pw()).catch(function(e){ msg(msgErr(e)); }); };
+  $id("btn-olvido").onclick = function(){
+    if (!em()){ msg("Escriba su correo y vuelva a tocar «Olvidé mi contraseña»."); return; }
+    CLOUD.auth.sendPasswordResetEmail(em()).then(function(){ msg("Le enviamos un correo para cambiar la contraseña."); }).catch(function(e){ msg(msgErr(e)); });
+  };
+  $id("btn-lg-cerrar").onclick = function(){ cerrarDlg("dlg-login"); };
+  $id("btn-pol-cerrar").onclick = function(){ cerrarDlg("dlg-pol"); };
+  document.addEventListener("click", function(e){ var a = e.target.closest("[data-pol]"); if (a){ e.preventDefault(); abrirDlg("dlg-pol"); } });
+  $id("cuenta").addEventListener("click", function(e){ var b = e.target.closest("button[data-act]"); if (b) acciones[b.dataset.act](); });
+  main.addEventListener("click", function(e){
+    var b = e.target.closest("button[data-cli]"); if (b) abrirCliente(b.dataset.cli);
+    var r = e.target.closest("button[data-refresh]"); if (r){ stopList(); escucharClientes(); }
+  });
+  window.addEventListener("beforeunload", function(){ flushCloud(); });
+})();
+function estadoTexto(){
+  var st = CLOUD.status;
+  if (st === "ok") return "☁ Guardado en la nube · " + hora(CLOUD.saved);
+  if (st === "pendiente") return "☁ Cambios por guardar…";
+  if (st === "guardando") return navigator.onLine === false ? "☁ Sin conexión: se guardará al volver la señal" : "☁ Guardando…";
+  if (st === "cargando") return "☁ Cargando…";
+  if (st === "consent") return "☁ Falta la autorización de datos";
+  if (st === "conectando") return "☁ Conectando…";
+  if (st === "error") return "⚠ Error en la nube";
+  return "";
+}
+function renderCuenta(){
+  var el = document.getElementById("cuenta"); if (!el) return;
+  if (!cloudConfigured()){ el.innerHTML = ""; return; }
+  if (!CLOUD.on || !CLOUD.ready){ el.innerHTML = '<span class="chip">'+(CLOUD.status === "error" ? "⚠ Nube no disponible" : "☁ Conectando…")+'</span>'; return; }
+  if (!CLOUD.user){ el.innerHTML = '<button class="btn sm light" data-act="login">Iniciar sesión · guardar en la nube</button>'; return; }
+  el.innerHTML = '<span class="chip">'+estadoTexto()+'</span>'+
+    (CLOUD.status === "error" ? '<button class="btn sm light" data-act="retry">Reintentar</button>' : '')+
+    '<span class="chip" title="'+esc(CLOUD.user.email||"")+'">'+(CLOUD.admin ? "Asesor · " : "")+esc(CLOUD.user.email || "Cuenta")+'</span>'+
+    '<button class="btn sm ghost" data-act="logout">Salir</button>';
+}
+function tarjetaNube(){
+  if (!cloudConfigured()) return "";
+  if (!CLOUD.user) return '<div class="card"><h3>Guardar en la nube</h3><p class="help">Inicie sesión con Google o con su correo y sus datos se guardarán solos: podrá abrirlos desde cualquier dispositivo y su asesor podrá revisarlos para acompañarlo.</p>'+
+    '<button class="btn" data-act="login">Iniciar sesión</button></div>';
+  if (CLOUD.viewing) return "";
+  return '<div class="card"><h3>Guardado en la nube</h3><p class="help" style="margin-bottom:8px">Sesión iniciada como <b>'+esc(CLOUD.user.email||"")+'</b>. Cada cambio se guarda solo, unos segundos después de escribirlo.</p>'+
+    '<div class="status">'+estadoTexto()+(CLOUD.err && CLOUD.status === "error" ? ' · <span class="miss">'+esc(CLOUD.err)+'</span>' : '')+'</div>'+
+    '<div class="toolbar"><button class="btn ghost" data-act="logout">Cerrar sesión</button><button class="btn del" data-act="borrarNube">Eliminar mis datos de la nube</button></div></div>';
+}
+V.clientes = function(R){
+  var lista = CLOUD.clientes || [];
+  var h = '<h2>Clientes</h2><p class="help">Todos los negocios que guardan en la nube, del más reciente al más antiguo. Toque «Abrir» para ver o ajustar los datos de un cliente; los cambios se guardan en su cuenta.</p>'+
+    '<div class="toolbar"><button class="btn sm ghost" data-refresh="1">Actualizar lista</button></div>';
+  if (CLOUD.errList) h += '<div class="alert bad">No se pudo leer la lista: '+esc(CLOUD.errList)+'. Revise que su correo esté en las reglas de seguridad y que haya entrado con Google.</div>';
+  h += '<div class="tw"><table><thead><tr><th style="min-width:200px">Negocio</th><th>Correo</th><th>Última actualización</th><th class="r">Utilidad del mes</th><th class="r">Food cost</th><th class="r">Platos</th><th class="r">Alertas</th><th></th></tr></thead><tbody>';
+  if (!lista.length) h += '<tr><td colspan="8" class="muted" style="text-align:center;padding:16px">Todavía no hay clientes guardando en la nube.</td></tr>';
+  lista.forEach(function(c){
+    var r = c.resumen || {}, mio = CLOUD.user && c.id === CLOUD.user.uid;
+    h += '<tr><td><b>'+esc(c.restaurante || "(sin nombre)")+'</b>'+(mio ? ' <span class="muted">(sus datos)</span>' : '')+'</td><td>'+esc(c.email||"")+'</td>'+
+      '<td>'+hora(ts(c.actualizado))+(c.editadoPor && c.editadoPor !== c.email ? '<div class="muted" style="font-size:12px">por '+esc(c.editadoPor)+'</div>' : '')+'</td>'+
+      '<td class="r calc">'+money(r.uo)+'</td><td class="r calc">'+pct(r.fc)+'</td><td class="r">'+num(r.platos)+'</td>'+
+      '<td class="r">'+(r.alertas ? '<span class="miss">'+r.alertas+'</span>' : '0')+'</td>'+
+      '<td><button class="btn sm" data-cli="'+esc(c.id)+'">'+(CLOUD.viewing && CLOUD.viewing.id === c.id ? "Abierto" : "Abrir")+'</button></td></tr>';
+  });
+  return h + '</tbody></table></div>';
 };
 
 render();
+initCloud();
 window.__costeo = {state:function(){ return S; }, calc:calc, leer:leerPlantilla, meta:function(){ return META; }};
 })();
 </script>
