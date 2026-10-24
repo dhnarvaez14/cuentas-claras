@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cuentas Claras · Business Solutions</title>
 <meta name="description" content="Cuentas Claras, de Business Solutions: aplicación para calcular el costo real de cada plato, el precio sugerido, la ingeniería de menú y el punto de equilibrio de un restaurante.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_CO">
+<meta property="og:title" content="Cuentas Claras · Costos reales, precios justos">
+<meta property="og:description" content="Calcule el costo real de cada producto, el precio sugerido, el margen y el punto de equilibrio de su restaurante, panadería, cafetería o heladería.">
+<meta property="og:url" content="https://dhnarvaez14.github.io/cuentas-claras/">
+<meta property="og:image" content="https://dhnarvaez14.github.io/cuentas-claras/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1F3A5F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap">
 <style>
@@ -37,6 +47,7 @@ h3{font-size:17px;margin:0 0 10px;color:var(--navy)}
 p.help{color:var(--muted);margin:0 0 16px;max-width:820px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid2>*,.grid3>*{min-width:0}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
@@ -52,6 +63,8 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
 .field{margin-bottom:10px}
 .btn{font:inherit;font-weight:700;border-radius:9px;padding:8px 14px;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff}
 .btn.ghost{background:#fff;color:var(--navy)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+[hidden]{display:none!important}
 .btn.sm{padding:4px 9px;font-size:13px}
 .btn.del{background:#fff;color:var(--bad);border-color:#E6B8B5}
 .btn:focus-visible{outline:2px solid var(--navy-2);outline-offset:2px}
@@ -69,6 +82,14 @@ label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bot
 .neg{color:var(--bad);font-weight:700}
 .muted{color:var(--muted)}
 .miss{color:var(--bad);font-weight:700}
+.bienv{max-width:640px;margin:24px auto;text-align:center}
+.bienv .card{padding:28px 22px}
+.bienv h2{font-size:28px}
+.bienv ul{text-align:left;max-width:440px;margin:16px auto;padding-left:20px;line-height:1.6}
+.bienv .btn{font-size:17px;padding:12px 20px}
+.bienv .acc{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:18px}
+#banner.demo{background:#FFF1C2;color:#5A3A00;border-bottom:1px solid #E8D08A}
+#banner.demo .wrap{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding-top:10px;padding-bottom:10px}
 .tipos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px}
 .tipo{font:inherit;text-align:left;cursor:pointer;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);display:flex;align-items:center;gap:10px;font-weight:700}
 .tipo span{font-size:24px;line-height:1}
@@ -150,6 +171,7 @@ a.btn{text-decoration:none;display:inline-block}
 <dialog id="dlg-login"><div class="dlg">
   <h3>Guardar en la nube</h3>
   <p class="help" style="margin:0">Inicie sesión para que sus datos se guarden solos y pueda abrirlos desde cualquier celular o computador.</p>
+  <div id="lg-app" class="alert warn" hidden style="margin:0"><b>Está abriendo Cuentas Claras dentro de otra aplicación</b> (WhatsApp, Instagram, Facebook o TikTok). Ahí Google no permite iniciar sesión. Toque <b>⋮</b> o <b>···</b> y elija <b>«Abrir en el navegador»</b> o <b>«Abrir en Chrome / Safari»</b>, o entre abajo con su correo.<div class="row" style="margin-top:8px"><button type="button" class="btn sm ghost" id="btn-copiar">Copiar el enlace</button></div></div>
   <button type="button" class="btn" id="btn-google">Continuar con Google</button>
   <div class="sep-or">o con su correo</div>
   <label>Correo<input type="email" id="lg-email" autocomplete="email"></label>
@@ -161,7 +183,7 @@ a.btn{text-decoration:none;display:inline-block}
 <dialog id="dlg-consent"><div class="dlg">
   <h3>Autorización para guardar sus datos</h3>
   <p style="margin:0">Para guardar su información en la nube necesitamos su autorización. Sus datos se usarán solo para guardar su trabajo, permitirle verlo en otros dispositivos y que su asesor de Business Solutions pueda revisarlo y acompañarlo.</p>
-  <label class="chk"><input type="checkbox" id="cs-acepto"> <span>Autorizo a Daniel Humberto Narvaez Gallardo (Business Solutions) el tratamiento de mis datos según la <a href="#" data-pol>Política de tratamiento de datos</a>.</span></label>
+  <label class="chk"><input type="checkbox" id="cs-acepto"> <span>Autorizo a Daniel Humberto Narvaez Gallardo (Business Solutions) el tratamiento de mis datos según la <a href="#" data-pol>Política de tratamiento de datos</a>, y entiendo que los resultados de la aplicación son estimaciones que dependen de los datos que yo ingreso y no reemplazan la asesoría contable, tributaria, laboral ni legal.</span></label>
   <label class="chk"><input type="checkbox" id="cs-subir" checked> <span>Guardar en mi cuenta los datos que tengo ahora en este dispositivo.</span></label>
   <div class="row"><button type="button" class="btn" id="cs-ok" disabled>Aceptar y guardar</button><button type="button" class="btn ghost" id="cs-no">No, seguir solo en este dispositivo</button></div>
 </div></dialog>
@@ -208,6 +230,7 @@ var FIREBASE_CONFIG = {
 // Correos de los asesores que pueden ver a todos los clientes (deben entrar con Google).
 var ADMINS = ["danielhnarvaezgallardo@gmail.com"];
 var FB_VER = "10.12.2";
+var DEMO = false, SIN_NUBE = false, LENTO = false;
 var CLOUD = {on:false, ready:false, user:null, admin:false, docId:null, viewing:null, status:"local", saved:0, timer:null,
              unsub:null, unsubList:null, lastJson:"", remote:null, clientes:[], err:""};
 var TABS = [["inicio","Inicio"],["parametros","Parámetros"],["insumos","Insumos"],["subrecetas","Subrecetas"],["platos","Platos"],
@@ -415,11 +438,11 @@ try { S = JSON.parse(localStorage.getItem(KEY)); } catch(e){ S = null; }
 if (!S || !S.params) S = ejemplo();
 try { UI = JSON.parse(localStorage.getItem(UIKEY)) || {}; } catch(e){ UI = {}; }
 UI.tab = UI.tab || "inicio";
-function save(){ try { if (!CLOUD.viewing) localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(UIKEY, JSON.stringify(UI)); } catch(e){} }
+function save(){ try { if (!CLOUD.viewing && !DEMO) localStorage.setItem(KEY, JSON.stringify(S)); localStorage.setItem(UIKEY, JSON.stringify(UI)); } catch(e){} }
 var METAKEY = "costeoRestaurante.meta", META;
 try { META = JSON.parse(localStorage.getItem(METAKEY)) || {}; } catch(e){ META = {}; }
 function saveMeta(){ try { localStorage.setItem(METAKEY, JSON.stringify(META)); } catch(e){} }
-function touch(){ META.changed = Date.now(); if (!META.pending) META.pending = META.changed; saveMeta(); cloudQueue(); }
+function touch(){ if (DEMO) return; META.changed = Date.now(); if (!META.pending) META.pending = META.changed; saveMeta(); cloudQueue(); }
 function markBackup(){ META.backup = Date.now(); META.pending = null; saveMeta(); renderBanner(); }
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch(e){}
 function fecha(t){ return t ? new Date(t).toLocaleString("es-CO",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}) : "nunca"; }
@@ -437,6 +460,12 @@ function renderDatalists(){
 }
 function renderBanner(){
   var b = document.getElementById("banner"); if (!b) return;
+  if (DEMO){
+    b.className = "demo";
+    b.innerHTML = '<div class="wrap"><span><b>Está viendo un ejemplo.</b> Puede mover los números, pero los cambios no se guardan. Cree su cuenta gratis para costear su propio negocio.</span>'+
+      '<span class="row"><button class="btn sm" data-act="login">Crear mi cuenta gratis</button><button class="btn sm ghost" data-act="salirDemo">Salir del ejemplo</button></span></div>';
+    return;
+  }
   if (CLOUD.viewing){
     b.className = "viendo";
     b.innerHTML = '<div class="wrap"><span>Está viendo los datos de <b>'+esc(CLOUD.viewing.restaurante||"cliente")+'</b> ('+esc(CLOUD.viewing.email||"")+'). Los cambios que haga se guardan en la cuenta del cliente.</span>'+
@@ -616,8 +645,9 @@ V.inicio = function(R){
   '<div class="card"><h3>1. ¿Qué tipo de negocio es?</h3>'+
     '<div class="tipos" role="group" aria-label="Tipo de negocio">'+TIPOS.map(function(t){ return '<button class="tipo" data-act="tipo" data-t="'+t+'" aria-pressed="'+(tipoDe(S)===t)+'"><span aria-hidden="true">'+NEG[t].icono+'</span>'+NEG[t].label+'</button>'; }).join("")+'</div>'+
     '<p style="margin:0 0 12px"><b>Ejemplo de '+ng.label.toLowerCase()+':</b> '+ng.desc+'</p>'+
+    (DEMO ? '<div class="toolbar"><button class="btn" data-act="login">Empezar con mi negocio</button></div><p class="muted" style="font-size:13px;margin:8px 0 0">Toque otro tipo para ver su ejemplo.</p></div>' :
     '<div class="toolbar"><button class="btn" data-act="demo">Ver el ejemplo de '+ng.label.toLowerCase()+'</button><button class="btn ghost" data-act="blank">Empezar en blanco</button></div>'+
-    '<p class="muted" style="font-size:13px;margin:8px 0 0">Elegir el tipo no borra nada. El ejemplo y «Empezar en blanco» sí reemplazan los datos actuales.</p></div>'+
+    '<p class="muted" style="font-size:13px;margin:8px 0 0">Elegir el tipo no borra nada. El ejemplo y «Empezar en blanco» sí reemplazan los datos actuales.</p></div>')+
   '<div class="grid3" style="margin-bottom:16px">'+
     '<div class="stat"><div class="k">Utilidad operacional del mes</div><div class="v">'+money(R.uo)+'</div></div>'+
     '<div class="stat"><div class="k">Punto de equilibrio (caja al día)</div><div class="v">'+money(R.peDia)+'</div></div>'+
@@ -756,7 +786,9 @@ V.platos = function(R){
     '<div>Minutos por porción (directos + subrecetas)</div><div>'+num(r.minPor)+'</div>'+
     '<div>Mano de obra directa</div><div>'+money(r.mod)+'</div>'+
     '<div>CIF</div><div>'+money(r.cif)+'</div>'+
-    '<div class="big">Costo de producción por porción</div><div class="big">'+money(r.costo)+'</div><div class="sep"></div><div class="sep"></div>'+
+    '<div class="big">Costo de producción por porción</div><div class="big">'+money(r.costo)+'</div>'+
+    '<div class="muted" style="grid-column:1/-1;font-size:13px;line-height:1.4;background:var(--soft);border-radius:8px;padding:8px 10px">Este costo incluye la parte de la nómina y de los CIF que le corresponde a cada porción: sirve para <b>fijar el precio</b>. Pero vender una porción más solo le cuesta la materia prima, el empaque y la comisión (el <b>costo variable</b>, más abajo): la nómina y el arriendo se pagan igual. Por eso en Resultados se tratan como costos fijos.</div>'+
+    '<div class="sep"></div><div class="sep"></div>'+
     '<div>Precio neto (sin impuesto al consumo)</div><div>'+money(r.neto)+'</div>'+
     '<div>Food cost (meta '+pct(S.params.fco)+')</div><div>'+pct(r.fc)+'</div>'+
     '<div>Prime cost (máximo '+pct(S.params.prime)+')</div><div>'+pct(r.pc)+'</div>'+
@@ -985,7 +1017,36 @@ function porCategoria(R){
 
 // ---------------- Render ----------------
 var R;
+function puerta(){ return cloudConfigured() && !CLOUD.user && !DEMO && !SIN_NUBE; }
+function localPropio(){
+  try { var loc = JSON.parse(localStorage.getItem(KEY)); if (loc && loc.params && META.changed) return loc; } catch(e){}
+  return null;
+}
+V.bienvenida = function(){
+  var cargando = !CLOUD.ready && CLOUD.status !== "error";
+  var h = '<div class="bienv"><div class="card">'+
+    '<h2>Bienvenido a Cuentas Claras</h2><p class="help" style="margin:0 auto">Costos reales, precios justos y un negocio sin drama.</p>'+
+    '<ul><li>Calcule el <b>costo real</b> de cada producto y el <b>precio</b> que debería cobrar.</li>'+
+    '<li>Vea cuánto le <b>deja cada producto</b> y cuánto necesita vender para <b>no perder</b>.</li>'+
+    '<li>Sus datos se guardan solos en la nube y su asesor lo acompaña.</li></ul>';
+  if (cargando){
+    h += '<p class="muted" style="margin-top:18px">Conectando…</p>'+
+      (LENTO ? '<p class="muted" style="font-size:13px">Está tardando más de lo normal. Revise su conexión a internet.</p><div class="acc"><button class="btn ghost" data-act="sinNube">Trabajar sin conexión en este dispositivo</button></div>' : '');
+  } else {
+    h += '<div class="acc"><button class="btn" data-act="login">Entrar o crear mi cuenta gratis</button>'+
+      '<button class="btn ghost" data-act="verDemo">Ver un ejemplo primero</button></div>'+
+      (localPropio() ? '<p class="muted" style="font-size:13px;margin-top:14px">Tiene datos guardados en este dispositivo. Al entrar con su cuenta podrá subirlos a la nube.</p>' : '');
+  }
+  return h + '</div><p class="muted" style="font-size:12px">Es gratis. Al crear la cuenta se le pedirá autorización para guardar sus datos.</p></div>';
+};
 function render(){
+  if (puerta()){
+    document.getElementById("ttl").textContent = "";
+    document.getElementById("kpis").innerHTML = "";
+    document.getElementById("nav").innerHTML = "";
+    document.getElementById("main").innerHTML = V.bienvenida();
+    renderBanner(); renderCuenta(); return;
+  }
   R = calc();
   document.getElementById("ttl").textContent = "Cliente: " + (S.params.restaurante || "sin nombre");
   document.getElementById("kpis").innerHTML =
@@ -1165,6 +1226,7 @@ var acciones = {
     }
   },
   import: function(){
+    if (DEMO){ toast("Cree su cuenta gratis para cargar los datos de su negocio."); abrirLogin(); return; }
     var f = document.createElement("input"); f.type = "file"; f.accept = ".json,.txt,.xlsx,application/json,text/plain";
     f.onchange = function(){
       var file = f.files[0]; if (!file) return;
@@ -1239,9 +1301,12 @@ var acciones = {
     });
   },
   print: function(){ window.print(); },
-  tipo: function(d){ if (!d || !NEG[d.t]) return; S.params.tipo = d.t; touch(); save(); render(); },
-  blank: function(){ if (confirm("Se borrarán los datos actuales para empezar en blanco como "+negocio().label.toLowerCase()+". ¿Continuar?")){ S = blanco(); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); cloudQueue(); } },
-  demo: function(){ if (confirm("Se reemplazarán los datos actuales por el ejemplo de "+negocio().label.toLowerCase()+". ¿Continuar?")){ S = ejemplo(tipoDe(S)); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); cloudQueue(); } },
+  tipo: function(d){ if (!d || !NEG[d.t]) return; if (DEMO){ S = ejemplo(d.t); UI.pl = null; UI.sub = null; render(); return; } S.params.tipo = d.t; touch(); save(); render(); },
+  verDemo: function(){ DEMO = true; S = ejemplo(tipoDe(localPropio() || S)); UI.tab = "inicio"; UI.pl = null; UI.sub = null; render(); window.scrollTo(0,0); },
+  salirDemo: function(){ DEMO = false; render(); window.scrollTo(0,0); },
+  sinNube: function(){ SIN_NUBE = true; render(); },
+  blank: function(){ if (DEMO){ toast("Cree su cuenta gratis para empezar con los datos de su negocio."); abrirLogin(); return; } if (confirm("Se borrarán los datos actuales para empezar en blanco como "+negocio().label.toLowerCase()+". ¿Continuar?")){ S = blanco(); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); cloudQueue(); } },
+  demo: function(){ if (DEMO){ S = ejemplo(tipoDe(S)); UI.pl = null; UI.sub = null; render(); return; } if (confirm("Se reemplazarán los datos actuales por el ejemplo de "+negocio().label.toLowerCase()+". ¿Continuar?")){ S = ejemplo(tipoDe(S)); UI.pl=null; UI.sub=null; META = {}; saveMeta(); save(); render(); cloudQueue(); } },
   login: function(){ abrirLogin(); },
   logout: function(){ if (confirm("¿Cerrar sesión? Sus datos quedan guardados en la nube.")) { flushCloud(); CLOUD.auth.signOut(); } },
   retry: function(){ CLOUD.lastJson = ""; cloudWrite(); },
@@ -1265,12 +1330,13 @@ function loadScripts(list, cb){
   (function next(){
     if (i >= list.length) return cb();
     var sc = document.createElement("script"); sc.src = list[i++]; sc.onload = next;
-    sc.onerror = function(){ CLOUD.status = "error"; CLOUD.err = "No se pudo conectar con el servicio de la nube."; renderCuenta(); };
+    sc.onerror = function(){ CLOUD.status = "error"; CLOUD.err = "No se pudo conectar con el servicio de la nube."; SIN_NUBE = true; render(); };
     document.head.appendChild(sc);
   })();
 }
 function initCloud(){
   if (!cloudConfigured()) return;
+  setTimeout(function(){ if (!CLOUD.ready){ LENTO = true; if (puerta()) render(); } }, 10000);
   CLOUD.status = "conectando"; renderCuenta();
   var base = "https://www.gstatic.com/firebasejs/" + FB_VER + "/";
   loadScripts([base+"firebase-app-compat.js", base+"firebase-auth-compat.js", base+"firebase-firestore-compat.js"], function(){
@@ -1281,7 +1347,7 @@ function initCloud(){
       try { CLOUD.db.enablePersistence({synchronizeTabs:true}).catch(function(){}); } catch(e){}
       CLOUD.on = true;
       CLOUD.auth.onAuthStateChanged(onUser);
-    } catch(e){ CLOUD.status = "error"; CLOUD.err = e.message; renderCuenta(); }
+    } catch(e){ CLOUD.status = "error"; CLOUD.err = e.message; SIN_NUBE = true; render(); }
   });
 }
 function stopDoc(){ if (CLOUD.unsub){ CLOUD.unsub(); CLOUD.unsub = null; } }
@@ -1290,11 +1356,18 @@ function onUser(u){
   CLOUD.user = u; CLOUD.ready = true;
   CLOUD.admin = !!(u && u.email && ADMINS.map(function(x){ return x.toLowerCase(); }).indexOf(u.email.toLowerCase()) > -1);
   stopDoc(); stopList(); CLOUD.viewing = null; CLOUD.lastJson = "";
+  var tipoDemo = DEMO ? tipoDe(S) : null;
+  DEMO = false;
+  var loc = localPropio();
   if (!u){
     CLOUD.docId = null; CLOUD.status = "local";
-    try { var loc = JSON.parse(localStorage.getItem(KEY)); if (loc && loc.params) S = Object.assign(blanco(), loc); } catch(e){}
+    if (loc) S = Object.assign(blanco(), loc);
     render(); return;
   }
+  // Al entrar: se trabaja con los datos propios del dispositivo (si los hay) o en blanco, nunca con el ejemplo
+  S = loc ? Object.assign(blanco(), loc) : blanco(tipoDemo || tipoDe(loc));
+  document.getElementById("cs-subir").checked = !!loc;
+  document.getElementById("cs-subir").closest("label").hidden = !loc;
   cerrarDlg("dlg-login");
   abrirPropio();
 }
@@ -1398,8 +1471,16 @@ var ERR = {"auth/invalid-email":"El correo no es válido.","auth/user-not-found"
   "auth/network-request-failed":"Sin conexión a internet. Intente de nuevo.","auth/too-many-requests":"Demasiados intentos. Espere unos minutos.",
   "auth/missing-password":"Escriba la contraseña.","auth/operation-not-allowed":"Este método de inicio de sesión no está activado en Firebase."};
 function msgErr(e){ return ERR[e && e.code] || (e && e.message) || "Ocurrió un error."; }
+function enOtraApp(){
+  var ua = navigator.userAgent || "";
+  return /FBAN|FBAV|FB_IAB|FBIOS|Instagram|WhatsApp|TikTok|musical_ly|Bytedance|Line\/|Snapchat|Twitter|; ?wv\)/i.test(ua);
+}
 function abrirLogin(){
   if (!CLOUD.on){ toast("La nube todavía no está disponible. Revise la conexión."); return; }
+  var app = enOtraApp();
+  document.getElementById("lg-app").hidden = !app;
+  document.getElementById("btn-google").disabled = app;
+  document.getElementById("btn-google").title = app ? "Abra la página en el navegador para entrar con Google" : "";
   document.getElementById("lg-msg").textContent = ""; abrirDlg("dlg-login");
 }
 (function(){
@@ -1419,6 +1500,12 @@ function abrirLogin(){
     CLOUD.auth.sendPasswordResetEmail(em()).then(function(){ msg("Le enviamos un correo para cambiar la contraseña."); }).catch(function(e){ msg(msgErr(e)); });
   };
   $id("btn-lg-cerrar").onclick = function(){ cerrarDlg("dlg-login"); };
+  $id("btn-copiar").onclick = function(){
+    var u = location.href.split("#")[0];
+    var ok = function(){ msg("Enlace copiado. Péguelo en Chrome o Safari."); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u).then(ok, function(){ prompt("Copie este enlace:", u); });
+    else prompt("Copie este enlace:", u);
+  };
   $id("btn-pol-cerrar").onclick = function(){ cerrarDlg("dlg-pol"); };
   document.addEventListener("click", function(e){ var a = e.target.closest("[data-pol]"); if (a){ e.preventDefault(); abrirDlg("dlg-pol"); } });
   $id("cuenta").addEventListener("click", function(e){ var b = e.target.closest("button[data-act]"); if (b) acciones[b.dataset.act](); });
